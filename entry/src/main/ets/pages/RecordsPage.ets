@@ -103,7 +103,7 @@ struct RecordsPage {
         })
       }
       .width('100%')
-      .padding({ left: 16, right: 16, top: 12, bottom: 12 })
+      .padding({ left: 16, right: 16, top: 8, bottom: 8 })
       .backgroundColor('#FFFFFF')
 
       // 筛选条件面板
@@ -348,21 +348,18 @@ struct RecordsPage {
     Swiper() {
       this.buildRecordItem(record)
 
-      Column() {
-        Button('删除')
-          .width('20%')
-          .height('100%')
-          .backgroundColor(COLORS.primary)
-          .fontColor('#FFFFFF')
-          .fontSize(12)
-          .onClick(() => {
-            this.viewModel.deleteRecord(record.id);
-            this.records = this.records.filter(r => r.id !== record.id);
-            this.applyFilters();
-          })
-      }
-      .width(50)
-      .height(68)
+      Button('删除')
+        .width(20)
+        .height(68)
+        .backgroundColor(COLORS.primary)
+        .fontColor('#FFFFFF')
+        .fontSize(12)
+        .onClick(() => {
+          this.viewModel.deleteRecord(record.id);
+          this.records = this.records.filter(r => r.id !== record.id);
+          StorageUtil.saveRecords(this.records);
+          this.applyFilters();
+        })
     }
     .indicator(false)
   }
