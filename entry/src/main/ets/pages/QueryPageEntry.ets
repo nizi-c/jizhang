@@ -1,8 +1,8 @@
-import
-  { AccountRecord } from '../models/AccountRecord';
+import { AccountRecord } from '../models/AccountRecord';
 import { AccountViewModel, QueryFilters } from '../viewmodel/AccountViewModel';
 import { COLORS, EXPENSE_CATEGORIES, INCOME_CATEGORIES, Category } from '../constants/Constants';
 import { StorageUtil } from '../utils/StorageUtil';
+import { ThemeUtil } from '../utils/ThemeUtil';
 import router from '@ohos.router';
 
 @Entry
@@ -197,7 +197,7 @@ struct QueryPageEntry {
             .margin({ bottom: 8 })
 
           Row() {
-            TextInput({ placeholder: '开始日期 YYYY-MM-DD' })
+            TextInput({ placeholder: '开始日期 ' })
               .width('48%')
               .height(40)
               .padding({ left: 10, right: 10 })
@@ -210,7 +210,7 @@ struct QueryPageEntry {
             Row()
               .width('4%')
 
-            TextInput({ placeholder: '结束日期 YYYY-MM-DD' })
+            TextInput({ placeholder: '结束日期 ' })
               .width('48%')
               .height(40)
               .padding({ left: 10, right: 10 })

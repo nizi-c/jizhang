@@ -20,6 +20,7 @@ struct AccountBooksPage {
   @State renameBookName: string = '';
 
   private bookIcons: string[] = ['📒', '💰', '💳', '🏦', '📊', '💵', '🎯', '📝', '🔖', '📌'];
+  private scroller: Scroller = new Scroller();
 
   async aboutToAppear() {
     // 确保AccountBookUtil已初始化
@@ -28,6 +29,11 @@ struct AccountBooksPage {
       await AccountBookUtil.init(context);
     }
     await this.loadBooks();
+    
+    // 滚动到顶部
+    setTimeout(() => {
+      this.scroller.scrollEdge(Edge.Top);
+    }, 200);
   }
 
   async loadBooks() {
@@ -192,7 +198,7 @@ struct AccountBooksPage {
       .border({ width: { bottom: 1 }, color: this.getColorScheme().NAVBAR.borderColor })
 
       // 账本列表
-      Scroll() {
+      Scroll(this.scroller) {
         Column() {
           if (this.books.length === 0) {
             Column() {
@@ -211,6 +217,8 @@ struct AccountBooksPage {
         .width('100%')
         .padding({ top: 8, left: 16, right: 16, bottom: 16 })
       }
+      .scrollable(ScrollDirection.Vertical)
+      .edgeEffect(EdgeEffect.Spring)
       .layoutWeight(1)
 
       // 创建账本对话框
