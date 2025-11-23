@@ -150,15 +150,35 @@ export class AccountViewModel {
     });
 
     const summaries: CategorySummary[] = [];
-    categoryMap.forEach((amount, category) => {
+    categoryMap.forEach((amount: number, category: string) => {
       summaries.push({
         category,
         amount,
-        percentage: total > 0 ? (amount / total) * 100 : 0
+        percentage: total > 0 ? (amount / total) * 100 : 0,
+        color: this.getCategoryColor(category)
       });
     });
 
     return summaries.sort((a, b) => b.amount - a.amount);
+  }
+
+  // 获取分类颜色
+  getCategoryColor(category: string): string {
+    const colors: Record<string, string> = {
+      '食物': '#E8A5A5',
+      '交通': '#8FAADC',
+      '娱乐': '#E8C9A5',
+      '购物': '#C9B6D6',
+      '医疗': '#95D1B3',
+      '教育': '#A5C8E8',
+      '住房': '#B8B5B2',
+      '工资': '#95D1B3',
+      '奖金': '#E8C9A5',
+      '投资': '#8FAADC',
+      '兼职': '#C9B6D6',
+      '其他': '#D6C9B6'
+    };
+    return colors[category] || '#B8B5B2';
   }
 
   // 按条件查询 - 使用明确的QueryFilters类型

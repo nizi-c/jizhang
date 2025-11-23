@@ -5,9 +5,11 @@ import { DateUtil } from '../utils/DateUtil';
 import { COLORS, DynamicColors, ColorScheme } from '../constants/Constants';
 import { LIGHT_COLOR_SCHEME, DARK_COLOR_SCHEME } from '../constants/ColorSchemes';
 import { ThemeUtil, ThemeType, ThemeColors } from '../utils/ThemeUtil';
+import { MockData } from '../utils/MockData';
 import router from '@ohos.router';
 import { QueryPage } from './QueryPage';
 import { ChartPage } from './ChartPage';
+import promptAction from '@ohos.promptAction';
 
 @Entry
 @Component
@@ -155,6 +157,72 @@ struct Index {
         this.currentTheme = ThemeUtil.toggleTheme();
         this.colors = ThemeUtil.getColors();
         this.menuDialogController?.close();
+      })
+
+      Divider()
+        .strokeWidth(1)
+        .color(this.colors.border)
+
+      Button() {
+        Row() {
+          Text('📊')
+            .fontSize(20)
+            .margin({ right: 8 })
+          Text('生成测试数据')
+            .fontColor(this.colors.textPrimary)
+        }
+      }
+      .width('100%')
+      .height(44)
+      .backgroundColor(this.colors.cardBg)
+      .onClick(async () => {
+        this.menuDialogController?.close();
+        try {
+          await MockData.generateMockData();
+          promptAction.showToast({
+            message: '已生成30天测试数据',
+            duration: 2000
+          });
+          this.loadRecords();
+        } catch (error) {
+          promptAction.showToast({
+            message: '生成数据失败',
+            duration: 2000
+          });
+        }
+      })
+
+      Divider()
+        .strokeWidth(1)
+        .color(this.colors.border)
+
+      Button() {
+        Row() {
+          Text('🗑️')
+            .fontSize(20)
+            .margin({ right: 8 })
+          Text('清除所有数据')
+            .fontColor('#E8A5A5')
+        }
+      }
+      .width('100%')
+      .height(44)
+      .backgroundColor(this.colors.cardBg)
+      .onClick(async () => {
+        this.menuDialogController?.close();
+        try {
+          await MockData.clearAllData();
+          promptAction.showToast({
+            message: '已清除所有数据',
+            duration: 2000
+          });
+          this.loadRecords();
+        } catch (error) {
+          promptAction.showToast({
+            message: '清除数据失败',
+            duration: 2000
+          });
+        }
       })
     }
     .width('70%')

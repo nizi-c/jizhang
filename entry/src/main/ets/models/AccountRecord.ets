@@ -33,4 +33,5 @@ export interface CategorySummary {
   category: string;
   amount: number;
   percentage: number;
+  color: string;
 }
