@@ -229,10 +229,10 @@ export const LIGHT_COLOR_SCHEME: LightColorScheme = {
 
   // 添加记录弹窗 - 弹窗容器
   DIALOG: {
-    backgroundColor: addOpacity('#FDF0CE', 0.4),
+    backgroundColor: '#FDF0CE',
     titleColor: '#5D5C5A',
     closeButtonColor: '#5D5C5A',
-    borderColor: addOpacity('#FDF0CE', 0.4)
+    borderColor: '#FDF0CE'
   } as DialogColors,
 
   // 类型选择器
@@ -248,12 +248,12 @@ export const LIGHT_COLOR_SCHEME: LightColorScheme = {
   // 分类选择网格
   CATEGORY_GRID: {
     itemBackground: addOpacity('#FDF0CE', 0.4),
-    activeBackground: '#8FAADC20',
+    activeBackground: '#FDF0CE',
     activeBorderColor: '#8FAADC',
     iconColor: '#5D5C5A',
     textColor: '#5D5C5A',
-    activeIconColor: '#8FAADC',
-    activeTextColor: '#8FAADC'
+    activeIconColor: '#5D5C5A',
+    activeTextColor: '#5D5C5A'
   } as CategoryGridColors,
 
   // 输入区域
@@ -401,10 +401,10 @@ export const DARK_COLOR_SCHEME: LightColorScheme = {
 
   // 添加记录弹窗 - 弹窗容器
   DIALOG: {
-    backgroundColor: addOpacity('#2D2D2D', 0.4),
+    backgroundColor: '#2D2D2D',
     titleColor: '#E8E6E3',
     closeButtonColor: '#E8E6E3',
-    borderColor: addOpacity('#4A4846', 0.4)
+    borderColor: '#4A4846'
   } as DialogColors,
 
   // 类型选择器

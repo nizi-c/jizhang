@@ -177,7 +177,7 @@ export struct QueryPage {
             .margin({ bottom: 8 })
 
           Row() {
-            TextInput({ placeholder: '开始日期 YYYY-MM-DD' })
+            TextInput({ placeholder: '开始日期 ', text: this.startDate })
               .width('48%')
               .height(40)
               .padding({ left: 10, right: 10 })
@@ -186,11 +186,24 @@ export struct QueryPage {
               .onChange((value: string) => {
                 this.startDate = value;
               })
+              .onClick(() => {
+                DatePickerDialog.show({
+                  selected: this.startDate ? new Date(this.startDate) : new Date(),
+                  onAccept: (value: DatePickerResult) => {
+                    if (value.year !== undefined && value.month !== undefined && value.day !== undefined) {
+                      const year = value.year;
+                      const month = String(value.month + 1).padStart(2, '0');
+                      const day = String(value.day).padStart(2, '0');
+                      this.startDate = `${year}-${month}-${day}`;
+                    }
+                  }
+                });
+              })
 
             Row()
               .width('4%')
 
-            TextInput({ placeholder: '结束日期 YYYY-MM-DD' })
+            TextInput({ placeholder: '结束日期 ', text: this.endDate })
               .width('48%')
               .height(40)
               .padding({ left: 10, right: 10 })
@@ -198,6 +211,19 @@ export struct QueryPage {
               .borderRadius(6)
               .onChange((value: string) => {
                 this.endDate = value;
+              })
+              .onClick(() => {
+                DatePickerDialog.show({
+                  selected: this.endDate ? new Date(this.endDate) : new Date(),
+                  onAccept: (value: DatePickerResult) => {
+                    if (value.year !== undefined && value.month !== undefined && value.day !== undefined) {
+                      const year = value.year;
+                      const month = String(value.month + 1).padStart(2, '0');
+                      const day = String(value.day).padStart(2, '0');
+                      this.endDate = `${year}-${month}-${day}`;
+                    }
+                  }
+                });
               })
           }
           .width('100%')

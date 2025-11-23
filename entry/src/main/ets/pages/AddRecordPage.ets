@@ -254,6 +254,19 @@ struct AddRecordPage {
             .onChange((value: string) => {
               this.selectedDate = value;
             })
+            .onClick(() => {
+              DatePickerDialog.show({
+                selected: this.selectedDate ? new Date(this.selectedDate) : new Date(),
+                onAccept: (value: DatePickerResult) => {
+                  if (value.year !== undefined && value.month !== undefined && value.day !== undefined) {
+                    const year = value.year;
+                    const month = String(value.month + 1).padStart(2, '0');
+                    const day = String(value.day).padStart(2, '0');
+                    this.selectedDate = `${year}-${month}-${day}`;
+                  }
+                }
+              });
+            })
             .margin({ bottom: 16 })
 
           // 心情选择

@@ -71,59 +71,91 @@ struct Index {
   @Builder
   buildMenuDialog() {
     Column() {
-      Button('添加账单')
-        .width('100%')
-        .height(44)
-        .backgroundColor(this.colors.cardBg)
-        .fontColor(this.colors.primary)
-        .fontWeight(FontWeight.Bold)
-        .onClick(() => {
-          this.menuDialogController?.close();
-          router.pushUrl({ url: 'pages/AddRecordPage' });
-        })
+      Button() {
+        Row() {
+          Image($r('app.media.tianjia'))
+            .width(24)
+            .height(24)
+            .margin({ right: 8 })
+          Text('添加账单')
+            .fontColor(this.colors.primary)
+            .fontWeight(FontWeight.Bold)
+        }
+      }
+      .width('100%')
+      .height(44)
+      .backgroundColor(this.colors.cardBg)
+      .onClick(() => {
+        this.menuDialogController?.close();
+        router.pushUrl({ url: 'pages/AddRecordPage' });
+      })
 
       Divider()
         .strokeWidth(1)
         .color(this.colors.border)
 
-      Button('流水')
-        .width('100%')
-        .height(44)
-        .backgroundColor(this.colors.cardBg)
-        .fontColor(this.colors.textPrimary)
-        .onClick(() => {
-          this.menuDialogController?.close();
-          router.pushUrl({ url: 'pages/RecordsPage' });
-        })
+      Button() {
+        Row() {
+          Image($r('app.media.liushui'))
+            .width(24)
+            .height(24)
+            .margin({ right: 8 })
+          Text('流水')
+            .fontColor(this.colors.textPrimary)
+        }
+      }
+      .width('100%')
+      .height(44)
+      .backgroundColor(this.colors.cardBg)
+      .onClick(() => {
+        this.menuDialogController?.close();
+        router.pushUrl({ url: 'pages/RecordsPage' });
+      })
 
       Divider()
         .strokeWidth(1)
         .color(this.colors.border)
 
-      Button('统计')
-        .width('100%')
-        .height(44)
-        .backgroundColor(this.colors.cardBg)
-        .fontColor(this.colors.textPrimary)
-        .onClick(() => {
-          this.menuDialogController?.close();
-          router.pushUrl({ url: 'pages/ChartPageEntry' });
-        })
+      Button() {
+        Row() {
+          Image($r('app.media.tongji'))
+            .width(24)
+            .height(24)
+            .margin({ right: 8 })
+          Text('统计')
+            .fontColor(this.colors.textPrimary)
+        }
+      }
+      .width('100%')
+      .height(44)
+      .backgroundColor(this.colors.cardBg)
+      .onClick(() => {
+        this.menuDialogController?.close();
+        router.pushUrl({ url: 'pages/ChartPageEntry' });
+      })
 
       Divider()
         .strokeWidth(1)
         .color(this.colors.border)
 
-      Button(this.currentTheme === 'light' ? '🌙 深色模式' : '☀️ 浅色模式')
-        .width('100%')
-        .height(44)
-        .backgroundColor(this.colors.cardBg)
-        .fontColor(this.colors.textPrimary)
-        .onClick(() => {
-          this.currentTheme = ThemeUtil.toggleTheme();
-          this.colors = ThemeUtil.getColors();
-          this.menuDialogController?.close();
-        })
+      Button() {
+        Row() {
+          Image(this.currentTheme === 'light' ? $r('app.media.moon') : $r('app.media.sun'))
+            .width(24)
+            .height(24)
+            .margin({ right: 8 })
+          Text(this.currentTheme === 'light' ? '深色模式' : '浅色模式')
+            .fontColor(this.colors.textPrimary)
+        }
+      }
+      .width('100%')
+      .height(44)
+      .backgroundColor(this.colors.cardBg)
+      .onClick(() => {
+        this.currentTheme = ThemeUtil.toggleTheme();
+        this.colors = ThemeUtil.getColors();
+        this.menuDialogController?.close();
+      })
     }
     .width('70%')
     .backgroundColor(this.colors.cardBg)

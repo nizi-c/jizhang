@@ -224,9 +224,9 @@ struct RecordsPage {
           .textAlign(TextAlign.Center)
 
         Button({ type: ButtonType.Circle, stateEffect: true }) {
-          Text('📤')
-            .fontSize(18)
-            .fontColor(this.getColorScheme().NAVBAR.buttonTextColor)
+          Image($r('app.media.daochu'))
+            .width(24)
+            .height(24)
         }
         .width(36)
         .height(36)
@@ -237,9 +237,9 @@ struct RecordsPage {
         })
 
         Button({ type: ButtonType.Circle, stateEffect: true }) {
-          Text(this.showFilters ? '✓' : '🔍')
-            .fontSize(20)
-            .fontColor(this.getColorScheme().NAVBAR.buttonTextColor)
+          Image($r('app.media.find'))
+            .width(24)
+            .height(24)
         }
         .width(36)
         .height(36)
@@ -419,7 +419,7 @@ struct RecordsPage {
         // 日期
         Text(String(day.day))
           .fontSize(16)
-          .fontColor(day.isToday ? this.getColorScheme().NAVBAR.buttonBackground : this.getColorScheme().LIST_ITEM.categoryColor)
+          .fontColor(day.isToday ? (ThemeUtil.getTheme() === 'light' ? '#7B9BC8' : this.getColorScheme().NAVBAR.buttonBackground) : this.getColorScheme().LIST_ITEM.categoryColor)
           .fontWeight(day.isToday ? FontWeight.Bold : FontWeight.Normal)
           .margin({ bottom: 4 })
 
@@ -600,7 +600,7 @@ struct RecordsPage {
           .margin({ bottom: 8 })
 
         Row() {
-          TextInput({ placeholder: '开始日期', text: this.startDate })
+          TextInput({ placeholder: '开始日期 YYYY-MM-DD', text: this.startDate })
             .width('48%')
             .height(40)
             .padding({ left: 10, right: 10 })
@@ -610,10 +610,24 @@ struct RecordsPage {
               this.startDate = value;
               this.applyFilters();
             })
+            .onClick(() => {
+              DatePickerDialog.show({
+                selected: this.startDate ? new Date(this.startDate) : new Date(),
+                onAccept: (value: DatePickerResult) => {
+                  if (value.year !== undefined && value.month !== undefined && value.day !== undefined) {
+                    const year = value.year;
+                    const month = String(value.month + 1).padStart(2, '0');
+                    const day = String(value.day).padStart(2, '0');
+                    this.startDate = `${year}-${month}-${day}`;
+                    this.applyFilters();
+                  }
+                }
+              });
+            })
 
           Row().width('4%')
 
-          TextInput({ placeholder: '结束日期', text: this.endDate })
+          TextInput({ placeholder: '结束日期 YYYY-MM-DD', text: this.endDate })
             .width('48%')
             .height(40)
             .padding({ left: 10, right: 10 })
@@ -622,6 +636,20 @@ struct RecordsPage {
             .onChange((value: string) => {
               this.endDate = value;
               this.applyFilters();
+            })
+            .onClick(() => {
+              DatePickerDialog.show({
+                selected: this.endDate ? new Date(this.endDate) : new Date(),
+                onAccept: (value: DatePickerResult) => {
+                  if (value.year !== undefined && value.month !== undefined && value.day !== undefined) {
+                    const year = value.year;
+                    const month = String(value.month + 1).padStart(2, '0');
+                    const day = String(value.day).padStart(2, '0');
+                    this.endDate = `${year}-${month}-${day}`;
+                    this.applyFilters();
+                  }
+                }
+              });
             })
         }
         .width('100%')
