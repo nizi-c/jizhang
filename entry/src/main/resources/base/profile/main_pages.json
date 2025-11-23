@@ -3,6 +3,7 @@
     "pages/Index",
     "pages/AddRecordPage",
     "pages/RecordsPage",
-    "pages/ChartPageEntry"
+    "pages/ChartPageEntry",
+    "pages/AccountBooksPage"
   ]
 }

@@ -6,10 +6,12 @@ import { COLORS, DynamicColors, ColorScheme } from '../constants/Constants';
 import { LIGHT_COLOR_SCHEME, DARK_COLOR_SCHEME } from '../constants/ColorSchemes';
 import { ThemeUtil, ThemeType, ThemeColors } from '../utils/ThemeUtil';
 import { MockData } from '../utils/MockData';
+import { AccountBookUtil } from '../utils/AccountBookUtil';
 import router from '@ohos.router';
 import { QueryPage } from './QueryPage';
 import { ChartPage } from './ChartPage';
 import promptAction from '@ohos.promptAction';
+import common from '@ohos.app.ability.common';
 
 @Entry
 @Component
@@ -22,10 +24,16 @@ struct Index {
   @State viewModel: AccountViewModel = new AccountViewModel();
   @State currentTheme: ThemeType = 'light';
   @State colors: ThemeColors = ThemeUtil.LIGHT_THEME;
+  @State currentBookName: string = '默认账本';
   menuDialogController: CustomDialogController | undefined = undefined;
 
-  aboutToAppear() {
-    StorageUtil.setContext(getContext(this));
+  async aboutToAppear() {
+    const context = getContext(this);
+    StorageUtil.setContext(context);
+    
+    // 初始化账本管理
+    await AccountBookUtil.init(context as common.UIAbilityContext);
+    
     ThemeUtil.initTheme().then(() => {
       this.currentTheme = ThemeUtil.getTheme();
       this.colors = ThemeUtil.getColors();
@@ -33,14 +41,22 @@ struct Index {
     this.loadRecords();
   }
 
-  onPageShow() {
-    this.loadRecords();
+  async onPageShow() {
+    await this.loadRecords();
+    await this.loadCurrentBook();
   }
 
   async loadRecords() {
     this.records = await StorageUtil.getRecords();
     this.viewModel.records = this.records;
     this.updateSummary();
+  }
+
+  async loadCurrentBook() {
+    const book = await AccountBookUtil.getCurrentBook();
+    if (book) {
+      this.currentBookName = book.name;
+    }
   }
 
   updateSummary() {
@@ -75,13 +91,35 @@ struct Index {
     Column() {
       Button() {
         Row() {
+          Image($r('app.media.zhangben'))
+            .width(24)
+            .height(24)
+            .margin({ right: 8 })
+          Text('账本管理')
+            .fontColor(this.colors.primary)
+            .fontWeight(FontWeight.Bold)
+        }
+      }
+      .width('100%')
+      .height(44)
+      .backgroundColor(this.colors.cardBg)
+      .onClick(() => {
+        this.menuDialogController?.close();
+        router.pushUrl({ url: 'pages/AccountBooksPage' });
+      })
+
+      Divider()
+        .strokeWidth(1)
+        .color(this.colors.border)
+
+      Button() {
+        Row() {
           Image($r('app.media.tianjia'))
             .width(24)
             .height(24)
             .margin({ right: 8 })
           Text('添加账单')
-            .fontColor(this.colors.primary)
-            .fontWeight(FontWeight.Bold)
+            .fontColor(this.colors.textPrimary)
         }
       }
       .width('100%')
@@ -159,7 +197,38 @@ struct Index {
         this.menuDialogController?.close();
       })
 
+      Divider()
+        .strokeWidth(1)
+        .color(this.colors.border)
 
+      Button() {
+        Row() {
+          Text('📊')
+            .fontSize(20)
+            .margin({ right: 8 })
+          Text('生成测试数据')
+            .fontColor(this.colors.textPrimary)
+        }
+      }
+      .width('100%')
+      .height(44)
+      .backgroundColor(this.colors.cardBg)
+      .onClick(async () => {
+        this.menuDialogController?.close();
+        try {
+          await MockData.generateMockData();
+          promptAction.showToast({
+            message: '已生成30天测试数据',
+            duration: 2000
+          });
+          this.loadRecords();
+        } catch (error) {
+          promptAction.showToast({
+            message: '生成数据失败',
+            duration: 2000
+          });
+        }
+      })
     }
     .width('70%')
     .backgroundColor(this.colors.cardBg)
@@ -170,10 +239,18 @@ struct Index {
     Column() {
       // 顶部导航栏
       Row() {
-        Text('记账本')
-          .fontSize(24)
-          .fontWeight(FontWeight.Bold)
-          .fontColor(this.getColorScheme().NAVBAR.titleColor)
+        Column() {
+          Text('记账本')
+            .fontSize(24)
+            .fontWeight(FontWeight.Bold)
+            .fontColor(this.getColorScheme().NAVBAR.titleColor)
+          Text(this.currentBookName)
+            .fontSize(12)
+            .fontColor(this.getColorScheme().LIST_ITEM.descriptionColor)
+            .margin({ top: 2 })
+        }
+        .alignItems(HorizontalAlign.Start)
+        
         Row()
           .layoutWeight(1)
         Button({ type: ButtonType.Circle, stateEffect: true }) {
