@@ -1,6 +1,8 @@
 import { AccountRecord, CategorySummary } from '../models/AccountRecord';
 import { AccountViewModel } from '../viewmodel/AccountViewModel';
-import { COLORS } from '../constants/Constants';
+import { COLORS, DynamicColors } from '../constants/Constants';
+import { LIGHT_COLOR_SCHEME, DARK_COLOR_SCHEME } from '../constants/ColorSchemes';
+import { ThemeUtil } from '../utils/ThemeUtil';
 import { DateUtil } from '../utils/DateUtil';
 import { StorageUtil } from '../utils/StorageUtil';
 import router from '@ohos.router';
@@ -30,6 +32,10 @@ struct ChartPageEntry {
     this.incomeCategories = this.viewModel.getCategorySummary('income', this.selectedMonth);
   }
 
+  getColorScheme() {
+    return ThemeUtil.getTheme() === 'light' ? LIGHT_COLOR_SCHEME : DARK_COLOR_SCHEME;
+  }
+
   build() {
     Column() {
       // 顶部导航栏
@@ -37,11 +43,11 @@ struct ChartPageEntry {
         Button({ type: ButtonType.Circle, stateEffect: true }) {
           Text('←')
             .fontSize(20)
-            .fontColor(COLORS.text)
+            .fontColor(this.getColorScheme().NAVBAR.backButtonColor)
         }
         .width(36)
         .height(36)
-        .backgroundColor(COLORS.background)
+        .backgroundColor(this.getColorScheme().NAVBAR.backgroundColor)
         .onClick(() => {
           router.back();
         })
@@ -49,7 +55,7 @@ struct ChartPageEntry {
         Text('统计')
           .fontSize(18)
           .fontWeight(FontWeight.Bold)
-          .fontColor(COLORS.text)
+          .fontColor(this.getColorScheme().NAVBAR.titleColor)
           .layoutWeight(1)
           .textAlign(TextAlign.Center)
 
@@ -58,15 +64,16 @@ struct ChartPageEntry {
       }
       .width('100%')
       .padding({ left: 16, right: 16, top: 8, bottom: 8 })
-      .backgroundColor('#FFFFFF')
+      .backgroundColor(this.getColorScheme().NAVBAR.backgroundColor)
+      .border({ width: { bottom: 1 }, color: this.getColorScheme().NAVBAR.borderColor })
 
       // 月份选择
       Row() {
         Button('<')
           .width(40)
           .height(36)
-          .backgroundColor(COLORS.background)
-          .fontColor(COLORS.text)
+          .backgroundColor(this.getColorScheme().MONTH_PICKER.buttonBackground)
+          .fontColor(this.getColorScheme().MONTH_PICKER.buttonTextColor)
           .onClick(() => {
             this.previousMonth();
           })
@@ -77,7 +84,7 @@ struct ChartPageEntry {
         Text(this.selectedMonth)
           .fontSize(14)
           .fontWeight(FontWeight.Bold)
-          .fontColor(COLORS.text)
+          .fontColor(this.getColorScheme().MONTH_PICKER.textColor)
 
         Row()
           .layoutWeight(1)
@@ -85,15 +92,15 @@ struct ChartPageEntry {
         Button('>')
           .width(40)
           .height(36)
-          .backgroundColor(COLORS.background)
-          .fontColor(COLORS.text)
+          .backgroundColor(this.getColorScheme().MONTH_PICKER.buttonBackground)
+          .fontColor(this.getColorScheme().MONTH_PICKER.buttonTextColor)
           .onClick(() => {
             this.nextMonth();
           })
       }
       .width('100%')
       .padding(12)
-      .backgroundColor('#FFFFFF')
+      .backgroundColor(this.getColorScheme().MONTH_PICKER.backgroundColor)
       .borderRadius(8)
       .margin({ left: 16, right: 16, top: 12, bottom: 12 })
 
@@ -104,13 +111,13 @@ struct ChartPageEntry {
             Text('支出分类分布')
               .fontSize(14)
               .fontWeight(FontWeight.Bold)
-              .fontColor(COLORS.text)
+              .fontColor(this.getColorScheme().CHART_CONTAINER.titleColor)
               .margin({ bottom: 12 })
 
             if (this.expenseCategories.length === 0) {
               Text('暂无数据')
                 .fontSize(12)
-                .fontColor(COLORS.textLight)
+                .fontColor(this.getColorScheme().CHART_CONTAINER.emptyTextColor)
                 .width('100%')
                 .textAlign(TextAlign.Center)
                 .padding(20)
@@ -120,7 +127,7 @@ struct ChartPageEntry {
           }
           .width('100%')
           .padding(16)
-          .backgroundColor('#FFFFFF')
+          .backgroundColor(this.getColorScheme().CHART_CONTAINER.backgroundColor)
           .borderRadius(8)
           .margin({ left: 16, right: 16, bottom: 16 })
 
@@ -129,13 +136,13 @@ struct ChartPageEntry {
             Text('收入分类分布')
               .fontSize(14)
               .fontWeight(FontWeight.Bold)
-              .fontColor(COLORS.text)
+              .fontColor(this.getColorScheme().CHART_CONTAINER.titleColor)
               .margin({ bottom: 12 })
 
             if (this.incomeCategories.length === 0) {
               Text('暂无数据')
                 .fontSize(12)
-                .fontColor(COLORS.textLight)
+                .fontColor(this.getColorScheme().CHART_CONTAINER.emptyTextColor)
                 .width('100%')
                 .textAlign(TextAlign.Center)
                 .padding(20)
@@ -145,7 +152,7 @@ struct ChartPageEntry {
           }
           .width('100%')
           .padding(16)
-          .backgroundColor('#FFFFFF')
+          .backgroundColor(this.getColorScheme().CHART_CONTAINER.backgroundColor)
           .borderRadius(8)
           .margin({ left: 16, right: 16, bottom: 16 })
 
@@ -154,52 +161,52 @@ struct ChartPageEntry {
             Text('详细统计')
               .fontSize(14)
               .fontWeight(FontWeight.Bold)
-              .fontColor(COLORS.text)
+              .fontColor(this.getColorScheme().CHART_CONTAINER.titleColor)
               .margin({ bottom: 12 })
 
             Column() {
               Text('支出')
                 .fontSize(12)
-                .fontColor(COLORS.textLight)
+                .fontColor(this.getColorScheme().DETAIL_LIST.sectionTitleColor)
                 .margin({ bottom: 8 })
 
               ForEach(this.expenseCategories, (item: CategorySummary) => {
                 Row() {
                   Text(item.category)
                     .fontSize(12)
-                    .fontColor(COLORS.text)
+                    .fontColor(this.getColorScheme().DETAIL_LIST.categoryColor)
                     .layoutWeight(1)
                   Text(`¥${item.amount.toFixed(2)}`)
                     .fontSize(12)
-                    .fontColor(COLORS.primary)
+                    .fontColor(this.getColorScheme().DETAIL_LIST.expenseAmountColor)
                     .fontWeight(FontWeight.Bold)
                 }
                 .width('100%')
                 .padding(8)
-                .backgroundColor(COLORS.background)
+                .backgroundColor(this.getColorScheme().DETAIL_LIST.itemBackground)
                 .borderRadius(4)
                 .margin({ bottom: 6 })
               }, (item: CategorySummary) => item.category)
 
               Text('收入')
                 .fontSize(12)
-                .fontColor(COLORS.textLight)
+                .fontColor(this.getColorScheme().DETAIL_LIST.sectionTitleColor)
                 .margin({ bottom: 8, top: 16 })
 
               ForEach(this.incomeCategories, (item: CategorySummary) => {
                 Row() {
                   Text(item.category)
                     .fontSize(12)
-                    .fontColor(COLORS.text)
+                    .fontColor(this.getColorScheme().DETAIL_LIST.categoryColor)
                     .layoutWeight(1)
                   Text(`¥${item.amount.toFixed(2)}`)
                     .fontSize(12)
-                    .fontColor('#6BCB77')
+                    .fontColor(this.getColorScheme().DETAIL_LIST.incomeAmountColor)
                     .fontWeight(FontWeight.Bold)
                 }
                 .width('100%')
                 .padding(8)
-                .backgroundColor(COLORS.background)
+                .backgroundColor(this.getColorScheme().DETAIL_LIST.itemBackground)
                 .borderRadius(4)
                 .margin({ bottom: 6 })
               }, (item: CategorySummary) => item.category)
@@ -208,7 +215,7 @@ struct ChartPageEntry {
           }
           .width('100%')
           .padding(16)
-          .backgroundColor('#FFFFFF')
+          .backgroundColor(this.getColorScheme().CHART_CONTAINER.backgroundColor)
           .borderRadius(8)
           .margin({ left: 16, right: 16 })
         }
@@ -231,11 +238,11 @@ struct ChartPageEntry {
           Row() {
             Text(item.category)
               .fontSize(12)
-              .fontColor(COLORS.text)
+              .fontColor(this.getColorScheme().PROGRESS_CHART.categoryColor)
               .layoutWeight(1)
             Text(`${item.percentage.toFixed(1)}%`)
               .fontSize(12)
-              .fontColor(COLORS.textLight)
+              .fontColor(this.getColorScheme().PROGRESS_CHART.percentageColor)
           }
           .width('100%')
           .margin({ bottom: 6 })
@@ -248,8 +255,8 @@ struct ChartPageEntry {
             })
               .width('100%')
               .height(6)
-              .color(type === 'expense' ? COLORS.primary : '#6BCB77')
-              .backgroundColor(COLORS.background)
+              .color(type === 'expense' ? this.getColorScheme().PROGRESS_CHART.expenseProgressColor : this.getColorScheme().PROGRESS_CHART.incomeProgressColor)
+              .backgroundColor(this.getColorScheme().PROGRESS_CHART.trackColor)
               .borderRadius(3)
           }
           .width('100%')

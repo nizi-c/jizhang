@@ -1,7 +1,9 @@
 import { AccountRecord } from '../models/AccountRecord';
 import { StorageUtil } from '../utils/StorageUtil';
 import { DateUtil } from '../utils/DateUtil';
-import { COLORS, EXPENSE_CATEGORIES, INCOME_CATEGORIES, Category } from '../constants/Constants';
+import { COLORS, DynamicColors, EXPENSE_CATEGORIES, INCOME_CATEGORIES, Category } from '../constants/Constants';
+import { LIGHT_COLOR_SCHEME, DARK_COLOR_SCHEME } from '../constants/ColorSchemes';
+import { ThemeUtil } from '../utils/ThemeUtil';
 import router from '@ohos.router';
 
 @Entry
@@ -22,6 +24,10 @@ struct AddRecordPage {
   updateCategories() {
     this.categories = this.recordType === 'income' ? INCOME_CATEGORIES : EXPENSE_CATEGORIES;
     this.selectedCategory = this.categories[0]?.name || '';
+  }
+
+  getColorScheme() {
+    return ThemeUtil.getTheme() === 'light' ? LIGHT_COLOR_SCHEME : DARK_COLOR_SCHEME;
   }
 
   async saveRecord() {
@@ -53,11 +59,11 @@ struct AddRecordPage {
         Button({ type: ButtonType.Circle, stateEffect: true }) {
           Text('←')
             .fontSize(20)
-            .fontColor(COLORS.text)
+            .fontColor(this.getColorScheme().NAVBAR.backButtonColor)
         }
         .width(36)
         .height(36)
-        .backgroundColor(COLORS.background)
+        .backgroundColor(this.getColorScheme().NAVBAR.backgroundColor)
         .onClick(() => {
           router.back();
         })
@@ -65,7 +71,7 @@ struct AddRecordPage {
         Text('添加账单')
           .fontSize(18)
           .fontWeight(FontWeight.Bold)
-          .fontColor(COLORS.text)
+          .fontColor(this.getColorScheme().NAVBAR.titleColor)
           .layoutWeight(1)
           .textAlign(TextAlign.Center)
 
@@ -74,7 +80,8 @@ struct AddRecordPage {
       }
       .width('100%')
       .padding({ left: 16, right: 16, top: 8, bottom: 8 })
-      .backgroundColor('#FFFFFF')
+      .backgroundColor(this.getColorScheme().NAVBAR.backgroundColor)
+      .border({ width: { bottom: 1 }, color: this.getColorScheme().NAVBAR.borderColor })
 
       Scroll() {
         Column() {
@@ -83,8 +90,8 @@ struct AddRecordPage {
             Button('支出')
               .width('48%')
               .height(44)
-              .backgroundColor(this.recordType === 'expense' ? COLORS.primary : COLORS.background)
-              .fontColor(this.recordType === 'expense' ? '#FFFFFF' : COLORS.text)
+              .backgroundColor(this.recordType === 'expense' ? this.getColorScheme().TYPE_SELECTOR.expenseActiveBackground : this.getColorScheme().TYPE_SELECTOR.inactiveBackground)
+              .fontColor(this.recordType === 'expense' ? this.getColorScheme().TYPE_SELECTOR.activeTextColor : this.getColorScheme().TYPE_SELECTOR.inactiveTextColor)
               .onClick(() => {
                 this.recordType = 'expense';
                 this.updateCategories();
@@ -96,8 +103,8 @@ struct AddRecordPage {
             Button('收入')
               .width('48%')
               .height(44)
-              .backgroundColor(this.recordType === 'income' ? '#6BCB77' : COLORS.background)
-              .fontColor(this.recordType === 'income' ? '#FFFFFF' : COLORS.text)
+              .backgroundColor(this.recordType === 'income' ? this.getColorScheme().TYPE_SELECTOR.incomeActiveBackground : this.getColorScheme().TYPE_SELECTOR.inactiveBackground)
+              .fontColor(this.recordType === 'income' ? this.getColorScheme().TYPE_SELECTOR.activeTextColor : this.getColorScheme().TYPE_SELECTOR.inactiveTextColor)
               .onClick(() => {
                 this.recordType = 'income';
                 this.updateCategories();
@@ -109,7 +116,7 @@ struct AddRecordPage {
           // 分类选择
           Text('分类')
             .fontSize(12)
-            .fontColor(COLORS.textLight)
+            .fontColor(this.getColorScheme().INPUT_SECTION.labelColor)
             .margin({ bottom: 8 })
 
           Scroll() {
@@ -121,16 +128,16 @@ struct AddRecordPage {
                     .margin({ bottom: 4 })
                   Text(category.name)
                     .fontSize(10)
-                    .fontColor(COLORS.text)
+                    .fontColor(this.selectedCategory === category.name ? this.getColorScheme().CATEGORY_GRID.activeTextColor : this.getColorScheme().CATEGORY_GRID.textColor)
                 }
                 .width(60)
                 .height(80)
                 .padding(8)
-                .backgroundColor(this.selectedCategory === category.name ? category.color + '20' : COLORS.background)
+                .backgroundColor(this.selectedCategory === category.name ? this.getColorScheme().CATEGORY_GRID.activeBackground : this.getColorScheme().CATEGORY_GRID.itemBackground)
                 .borderRadius(8)
                 .border({
                   width: this.selectedCategory === category.name ? 2 : 0,
-                  color: category.color
+                  color: this.getColorScheme().CATEGORY_GRID.activeBorderColor
                 })
                 .margin({ right: 8 })
                 .onClick(() => {
@@ -147,7 +154,7 @@ struct AddRecordPage {
           // 金额输入
           Text('金额')
             .fontSize(12)
-            .fontColor(COLORS.textLight)
+            .fontColor(this.getColorScheme().INPUT_SECTION.labelColor)
             .margin({ bottom: 8 })
 
           TextInput({ placeholder: '请输入金额', text: this.amount })
@@ -155,8 +162,9 @@ struct AddRecordPage {
             .width('100%')
             .height(44)
             .padding({ left: 12, right: 12 })
-            .backgroundColor(COLORS.background)
+            .backgroundColor(this.getColorScheme().INPUT_SECTION.inputBackground)
             .borderRadius(8)
+            .placeholderColor(this.getColorScheme().INPUT_SECTION.placeholderColor)
             .onChange((value: string) => {
               this.amount = value;
             })
@@ -165,15 +173,16 @@ struct AddRecordPage {
           // 用途描述
           Text('用途')
             .fontSize(12)
-            .fontColor(COLORS.textLight)
+            .fontColor(this.getColorScheme().INPUT_SECTION.labelColor)
             .margin({ bottom: 8 })
 
           TextInput({ placeholder: '请输入用途描述' })
             .width('100%')
             .height(44)
             .padding({ left: 12, right: 12 })
-            .backgroundColor(COLORS.background)
+            .backgroundColor(this.getColorScheme().INPUT_SECTION.inputBackground)
             .borderRadius(8)
+            .placeholderColor(this.getColorScheme().INPUT_SECTION.placeholderColor)
             .onChange((value: string) => {
               this.description = value;
             })
@@ -182,15 +191,16 @@ struct AddRecordPage {
           // 日期选择
           Text('日期')
             .fontSize(12)
-            .fontColor(COLORS.textLight)
+            .fontColor(this.getColorScheme().INPUT_SECTION.labelColor)
             .margin({ bottom: 8 })
 
           TextInput({ placeholder: 'YYYY-MM-DD', text: this.selectedDate })
             .width('100%')
             .height(44)
             .padding({ left: 12, right: 12 })
-            .backgroundColor(COLORS.background)
+            .backgroundColor(this.getColorScheme().INPUT_SECTION.inputBackground)
             .borderRadius(8)
+            .placeholderColor(this.getColorScheme().INPUT_SECTION.placeholderColor)
             .onChange((value: string) => {
               this.selectedDate = value;
             })
@@ -201,8 +211,8 @@ struct AddRecordPage {
             Button('取消')
               .width('48%')
               .height(44)
-              .backgroundColor(COLORS.background)
-              .fontColor(COLORS.text)
+              .backgroundColor(this.getColorScheme().BUTTON_SECTION.cancelBackground)
+              .fontColor(this.getColorScheme().BUTTON_SECTION.cancelTextColor)
               .onClick(() => {
                 router.back();
               })
@@ -213,8 +223,8 @@ struct AddRecordPage {
             Button('保存')
               .width('48%')
               .height(44)
-              .backgroundColor(COLORS.primary)
-              .fontColor('#FFFFFF')
+              .backgroundColor(this.getColorScheme().BUTTON_SECTION.saveBackground)
+              .fontColor(this.getColorScheme().BUTTON_SECTION.saveTextColor)
               .onClick(() => {
                 this.saveRecord();
               })
