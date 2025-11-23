@@ -2,6 +2,8 @@ import { AccountRecord } from '../models/AccountRecord';
 import { AccountViewModel, QueryFilters } from '../viewmodel/AccountViewModel';
 import { StorageUtil } from '../utils/StorageUtil';
 import { COLORS } from '../constants/Constants';
+import { ThemeUtil } from '../utils/ThemeUtil';
+import { LIGHT_COLOR_SCHEME, DARK_COLOR_SCHEME } from '../constants/ColorSchemes';
 import router from '@ohos.router';
 
 @Entry

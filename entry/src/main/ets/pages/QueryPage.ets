@@ -84,6 +84,18 @@ export struct QueryPage {
             .fontColor(COLORS.textLight)
             .margin({ bottom: 8 })
 
+          // 分类输入框
+          TextInput({ placeholder: '输入分类名称', text: this.selectedCategory })
+            .width('100%')
+            .height(40)
+            .padding({ left: 10, right: 10 })
+            .backgroundColor(COLORS.inputBg)
+            .borderRadius(6)
+            .onChange((value: string) => {
+              this.selectedCategory = value;
+            })
+            .margin({ bottom: 8 })
+
           Scroll() {
             Row() {
               Button('全部')
@@ -98,16 +110,23 @@ export struct QueryPage {
                 .margin({ right: 8 })
 
               ForEach(this.getAvailableCategories(), (category: Category) => {
-                Button(category.name)
-                  .width(60)
-                  .height(36)
-                  .backgroundColor(this.selectedCategory === category.name ? category.color : COLORS.background)
-                  .fontColor(this.selectedCategory === category.name ? '#FFFFFF' : COLORS.text)
-                  .fontSize(11)
-                  .onClick(() => {
-                    this.selectedCategory = category.name;
-                  })
-                  .margin({ right: 8 })
+                Button() {
+                  Column() {
+                    Text(category.icon)
+                      .fontSize(16)
+                    Text(category.name)
+                      .fontSize(10)
+                      .fontColor(COLORS.text)
+                  }
+                }
+                .width(60)
+                .height(60)
+                .backgroundColor(this.selectedCategory === category.name ? '#CCFDF0CE' : COLORS.background)
+                .borderRadius(8)
+                .onClick(() => {
+                  this.selectedCategory = category.name;
+                })
+                .margin({ right: 8 })
               }, (category: Category) => category.name)
             }
             .width('100%')
