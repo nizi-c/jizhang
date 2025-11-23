@@ -7,6 +7,7 @@ export interface AccountRecord {
   description: string; // 用途描述
   date: number; // 时间戳
   dateStr: string; // 日期字符串 YYYY-MM-DD
+  mood?: string; // 心情：'😊' | '😟' | '🎉'
 }
 
 export interface CategoryItem {

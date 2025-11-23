@@ -1,4 +1,5 @@
-import { AccountRecord } from '../models/AccountRecord';
+import
+  { AccountRecord } from '../models/AccountRecord';
 import { AccountViewModel, QueryFilters } from '../viewmodel/AccountViewModel';
 import { COLORS, EXPENSE_CATEGORIES, INCOME_CATEGORIES, Category } from '../constants/Constants';
 import { StorageUtil } from '../utils/StorageUtil';
