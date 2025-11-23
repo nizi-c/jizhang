@@ -140,6 +140,35 @@ struct RecordsPage {
     this.selectedDateRecords = this.filteredRecords.filter(r => r.dateStr === day.dateStr);
   }
 
+  private async deleteRecord(recordId: string) {
+    try {
+      // 保存当前选中的日期
+      const currentSelectedDate = this.selectedDate;
+      
+      // 从records中删除
+      this.records = this.records.filter(r => r.id !== recordId);
+      await StorageUtil.saveRecords(this.records);
+      
+      // 重新加载数据
+      await this.loadRecords();
+      
+      // 更新选中日期的记录列表
+      if (currentSelectedDate) {
+        this.selectedDateRecords = this.filteredRecords.filter(r => r.dateStr === currentSelectedDate);
+      }
+      
+      promptAction.showToast({
+        message: '删除成功',
+        duration: 1500
+      });
+    } catch (error) {
+      promptAction.showToast({
+        message: '删除失败',
+        duration: 2000
+      });
+    }
+  }
+
   private async exportData() {
     if (this.isExporting) {
       return;
@@ -371,6 +400,7 @@ struct RecordsPage {
                 ListItem() {
                   this.buildRecordItem(record)
                 }
+                .swipeAction({ end: this.buildDeleteButton(record) })
               }, (record: AccountRecord) => record.id)
             }
             .width('100%')
@@ -661,6 +691,21 @@ struct RecordsPage {
     .padding(16)
     .backgroundColor(COLORS.queryBg)
     .height('auto')
+  }
+
+  @Builder
+  buildDeleteButton(record: AccountRecord) {
+    Button() {
+      Text('删除')
+        .fontSize(14)
+        .fontColor('#FFFFFF')
+    }
+    .width(80)
+    .height('100%')
+    .backgroundColor('#E8A5A5')
+    .onClick(() => {
+      this.deleteRecord(record.id);
+    })
   }
 
   @Builder
