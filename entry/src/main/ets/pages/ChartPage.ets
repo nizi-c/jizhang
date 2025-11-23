@@ -2,6 +2,7 @@ import { AccountRecord, CategorySummary } from '../models/AccountRecord';
 import { AccountViewModel } from '../viewmodel/AccountViewModel';
 import { COLORS } from '../constants/Constants';
 import { DateUtil } from '../utils/DateUtil';
+import { ThemeUtil } from '../utils/ThemeUtil';
 
 @Component
 export struct ChartPage {
@@ -223,6 +224,10 @@ export struct ChartPage {
       }, (item: CategorySummary) => item.category)
     }
     .width('100%')
+    .height('100%')
+    .backgroundImage(ThemeUtil.getBackgroundImage(ThemeUtil.getTheme()))
+    .backgroundImageSize(ImageSize.Cover)
+    .backgroundImagePosition(Alignment.Center)
   }
 
   private previousMonth() {

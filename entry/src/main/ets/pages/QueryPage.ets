@@ -1,6 +1,7 @@
 import { AccountRecord } from '../models/AccountRecord';
 import { AccountViewModel, QueryFilters } from '../viewmodel/AccountViewModel';
 import { COLORS, EXPENSE_CATEGORIES, INCOME_CATEGORIES, Category } from '../constants/Constants';
+import { ThemeUtil } from '../utils/ThemeUtil';
 
 // 删除本地重复定义的QueryFilters接口，使用导入的QueryFilters
 // interface QueryFilters {
@@ -267,7 +268,9 @@ export struct QueryPage {
     }
     .width('100%')
     .height('100%')
-    .backgroundColor(COLORS.background)
+    .backgroundImage(ThemeUtil.getBackgroundImage(ThemeUtil.getTheme()))
+    .backgroundImageSize(ImageSize.Cover)
+    .backgroundImagePosition(Alignment.Center)
   }
 
   private getAvailableCategories(): Category[] {

@@ -398,5 +398,8 @@ struct AddRecordPage {
     .width('100%')
     .height('100%')
     .alignContent(Alignment.Center)
+    .backgroundImage(ThemeUtil.getBackgroundImage(ThemeUtil.getTheme()))
+    .backgroundImageSize(ImageSize.Cover)
+    .backgroundImagePosition(Alignment.Center)
   }
 }

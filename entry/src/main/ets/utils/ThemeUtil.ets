@@ -126,4 +126,15 @@ export class ThemeUtil {
     ThemeUtil.setTheme(newTheme);
     return newTheme;
   }
+
+  /**
+   * 获取当前主题的背景图片资源
+   */
+  static getBackgroundImage(theme?: ThemeType): Resource {
+    const currentTheme = theme || ThemeUtil.currentTheme;
+    console.log(`获取背景图片 - 主题: ${currentTheme}`);
+    const bgImage = currentTheme === 'light' ? $r('app.media.qita') : $r('app.media.dark');
+    console.log(`返回背景: ${currentTheme === 'light' ? 'qita.jpg' : 'dark.jpg'}`);
+    return bgImage;
+  }
 }

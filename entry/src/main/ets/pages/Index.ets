@@ -162,7 +162,9 @@ struct Index {
     }
     .width('100%')
     .height('100%')
-    .backgroundColor(this.colors.background)
+    .backgroundImage(ThemeUtil.getBackgroundImage(this.currentTheme))
+    .backgroundImageSize(ImageSize.Cover)
+    .backgroundImagePosition(Alignment.Center)
   }
 
 

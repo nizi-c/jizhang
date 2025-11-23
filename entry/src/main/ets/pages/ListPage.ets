@@ -97,7 +97,9 @@ struct ListPage {
     }
     .width('100%')
     .height('100%')
-    .backgroundColor(COLORS.background)
+    .backgroundImage(ThemeUtil.getBackgroundImage(ThemeUtil.getTheme()))
+    .backgroundImageSize(ImageSize.Cover)
+    .backgroundImagePosition(Alignment.Center)
   }
 
   @Builder

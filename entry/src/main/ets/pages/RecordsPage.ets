@@ -388,7 +388,9 @@ struct RecordsPage {
     }
     .width('100%')
     .height('100%')
-    .backgroundColor(this.getColorScheme().LIST_CONTAINER.backgroundColor)
+    .backgroundImage(ThemeUtil.getBackgroundImage(ThemeUtil.getTheme()))
+    .backgroundImageSize(ImageSize.Cover)
+    .backgroundImagePosition(Alignment.Center)
   }
 
   @Builder
