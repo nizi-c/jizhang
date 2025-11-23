@@ -289,13 +289,8 @@ struct RecordsPage {
       .padding(12)
       .backgroundColor(this.getColorScheme().MONTH_PICKER.backgroundColor)
 
-      // 星期标题
+      // 星期标题（周一开始）
       Row() {
-        Text('日')
-          .fontSize(12)
-          .fontColor(this.getColorScheme().CHART_CONTAINER.titleColor)
-          .width(`${100 / 7}%`)
-          .textAlign(TextAlign.Center)
         Text('一')
           .fontSize(12)
           .fontColor(this.getColorScheme().CHART_CONTAINER.titleColor)
@@ -322,6 +317,11 @@ struct RecordsPage {
           .width(`${100 / 7}%`)
           .textAlign(TextAlign.Center)
         Text('六')
+          .fontSize(12)
+          .fontColor(this.getColorScheme().CHART_CONTAINER.titleColor)
+          .width(`${100 / 7}%`)
+          .textAlign(TextAlign.Center)
+        Text('日')
           .fontSize(12)
           .fontColor(this.getColorScheme().CHART_CONTAINER.titleColor)
           .width(`${100 / 7}%`)
@@ -392,11 +392,11 @@ struct RecordsPage {
   @Builder
   buildCalendarGrid() {
     Grid() {
-      ForEach(this.calendarDays, (day: DayInfo) => {
+      ForEach(this.calendarDays, (day: DayInfo, index: number) => {
         GridItem() {
           this.buildDayCell(day)
         }
-      }, (day: DayInfo) => day.dateStr)
+      }, (day: DayInfo, index: number) => `${this.currentYear}-${this.currentMonth}-${index}`)
     }
     .columnsTemplate('1fr 1fr 1fr 1fr 1fr 1fr 1fr')
     .rowsGap(1)

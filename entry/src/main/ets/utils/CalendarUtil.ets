@@ -64,13 +64,19 @@ export class CalendarUtil {
     const today = new Date();
     const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
 
+    // 转换为周一开始的格式
+    // JavaScript getDay(): 0=周日, 1=周一, 2=周二, ..., 6=周六
+    // 我们需要: 0=周一, 1=周二, ..., 5=周六, 6=周日
+    // 转换公式: (firstDay + 6) % 7
+    const firstDayMondayBased = (firstDay + 6) % 7;
+
     // 添加空白填充（上月日期，但不显示）
-    for (let i = 0; i < firstDay; i++) {
+    for (let i = 0; i < firstDayMondayBased; i++) {
       const dayInfo = new DayInfo();
       dayInfo.year = year;
       dayInfo.month = month;
       dayInfo.day = 0; // 0 表示空白
-      dayInfo.dateStr = '';
+      dayInfo.dateStr = `${year}-${month}-blank-${i}`; // 给空白单元格唯一标识
       dayInfo.balance = 0;
       dayInfo.income = 0;
       dayInfo.expense = 0;
