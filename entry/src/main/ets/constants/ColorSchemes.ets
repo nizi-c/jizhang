@@ -1,5 +1,17 @@
 // 浅色主题配色方案接口定义
 
+// 辅助函数：将十六进制颜色转换为带透明度的颜色（ARGB格式）
+function addOpacity(color: string, opacity: number): string {
+  // 如果颜色已经有透明度，直接返回
+  if (color.length === 9) {
+    return color;
+  }
+  // 将透明度转换为十六进制（0-255），放在颜色前面
+  const alpha = Math.round(opacity * 255).toString(16).padStart(2, '0').toUpperCase();
+  // 移除 # 号，添加透明度，再加回 #
+  return '#' + alpha + color.substring(1);
+}
+
 interface NavbarColors {
   backgroundColor: string;
   titleColor: string;
@@ -175,41 +187,41 @@ interface LightColorScheme {
 export const LIGHT_COLOR_SCHEME: LightColorScheme = {
   // 首页导航栏
   NAVBAR: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: addOpacity('#FDF0CE', 0.4),
     titleColor: '#5D5C5A',
-    buttonBackground: '#8FAADC',
+    buttonBackground: addOpacity('#FDF0CE', 0.4),
     buttonTextColor: '#FFFFFF',
-    borderColor: '#E4E2E0',
+    borderColor: addOpacity('#FDF0CE', 0.4),
     backButtonColor: '#5D5C5A'
   } as NavbarColors,
 
   // 统计卡片
   STAT_CARD: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: addOpacity('#FDF0CE', 0.4),
     titleColor: '#8E8D8C',
     incomeColor: '#95D1B3',
     expenseColor: '#E8A5A5',
     balanceColor: '#5D5C5A',
     labelColor: '#8E8D8C',
-    borderColor: '#F5F3F1',
+    borderColor: addOpacity('#FDF0CE', 0.4),
     shadowColor: '#00000008'
   } as StatCardColors,
 
   // 最近记录列表
   RECENT_LIST: {
-    backgroundColor: '#FFFFFF',
-    itemBackground: '#FFFFFF',
+    backgroundColor: addOpacity('#FDF0CE', 0.4),
+    itemBackground: addOpacity('#FDF0CE', 0.4),
     categoryColor: '#5D5C5A',
     descriptionColor: '#8E8D8C',
     incomeAmountColor: '#95D1B3',
     expenseAmountColor: '#E8A5A5',
     dateColor: '#B4B3B2',
-    dividerColor: '#EDECEA'
+    dividerColor: addOpacity('#FDF0CE', 0.4)
   } as RecentListColors,
 
   // 标签页导航
   TAB_BAR: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: addOpacity('#FDF0CE', 0.4),
     activeTextColor: '#8FAADC',
     inactiveTextColor: '#8E8D8C',
     indicatorColor: '#8FAADC'
@@ -217,25 +229,25 @@ export const LIGHT_COLOR_SCHEME: LightColorScheme = {
 
   // 添加记录弹窗 - 弹窗容器
   DIALOG: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: addOpacity('#FDF0CE', 0.4),
     titleColor: '#5D5C5A',
     closeButtonColor: '#5D5C5A',
-    borderColor: '#E4E2E0'
+    borderColor: addOpacity('#FDF0CE', 0.4)
   } as DialogColors,
 
   // 类型选择器
   TYPE_SELECTOR: {
-    activeBackground: '#8FAADC',
-    activeTextColor: '#FFFFFF',
-    inactiveBackground: '#F5F3F1',
-    inactiveTextColor: '#8E8D8C',
-    expenseActiveBackground: '#E8A5A5',
-    incomeActiveBackground: '#95D1B3'
+    activeBackground: addOpacity('#8FAADC', 0.4),
+    activeTextColor: '#5D5C5A',
+    inactiveBackground: addOpacity('#FDF0CE', 0.4),
+    inactiveTextColor: '#5D5C5A',
+    expenseActiveBackground: addOpacity('#8FAADC', 0.4),
+    incomeActiveBackground: addOpacity('#8FAADC', 0.4)
   } as TypeSelectorColors,
 
   // 分类选择网格
   CATEGORY_GRID: {
-    itemBackground: '#F5F3F1',
+    itemBackground: addOpacity('#FDF0CE', 0.4),
     activeBackground: '#8FAADC20',
     activeBorderColor: '#8FAADC',
     iconColor: '#5D5C5A',
@@ -247,8 +259,8 @@ export const LIGHT_COLOR_SCHEME: LightColorScheme = {
   // 输入区域
   INPUT_SECTION: {
     labelColor: '#8E8D8C',
-    inputBackground: '#FAF9F7',
-    inputBorderColor: '#E4E2E0',
+    inputBackground: addOpacity('#FDF0CE', 0.4),
+    inputBorderColor: addOpacity('#FDF0CE', 0.4),
     inputTextColor: '#5D5C5A',
     placeholderColor: '#B4B3B2',
     errorColor: '#E8A5A5'
@@ -256,49 +268,49 @@ export const LIGHT_COLOR_SCHEME: LightColorScheme = {
 
   // 按钮区域
   BUTTON_SECTION: {
-    cancelBackground: '#F5F3F1',
+    cancelBackground: addOpacity('#FDF0CE', 0.4),
     cancelTextColor: '#5D5C5A',
-    saveBackground: '#8FAADC',
-    saveTextColor: '#FFFFFF'
+    saveBackground: addOpacity('#FDF0CE', 0.4),
+    saveTextColor: '#5D5C5A'
   } as ButtonSectionColors,
 
   // 列表容器
   LIST_CONTAINER: {
-    backgroundColor: '#FAF9F7',
+    backgroundColor: addOpacity('#FDF0CE', 0.4),
     emptyTextColor: '#8E8D8C'
   } as ListContainerColors,
 
   // 列表项
   LIST_ITEM: {
-    backgroundColor: '#FFFFFF',
-    swipeDeleteBackground: '#E8A5A5',
+    backgroundColor: addOpacity('#FDF0CE', 0.4),
+    swipeDeleteBackground: addOpacity('#E8A5A5', 0.4),
     deleteTextColor: '#FFFFFF',
     categoryColor: '#5D5C5A',
     descriptionColor: '#8E8D8C',
     amountIncomeColor: '#95D1B3',
     amountExpenseColor: '#E8A5A5',
     dateColor: '#B4B3B2',
-    dividerColor: '#EDECEA'
+    dividerColor: addOpacity('#FDF0CE', 0.4)
   } as ListItemColors,
 
   // 月份选择器
   MONTH_PICKER: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: addOpacity('#FDF0CE', 0.4),
     textColor: '#5D5C5A',
-    buttonBackground: '#F5F3F1',
+    buttonBackground: addOpacity('#FDF0CE', 0.4),
     buttonTextColor: '#5D5C5A'
   } as MonthPickerColors,
 
   // 图表容器
   CHART_CONTAINER: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: addOpacity('#FDF0CE', 0.4),
     titleColor: '#5D5C5A',
     emptyTextColor: '#8E8D8C'
   } as ChartContainerColors,
 
   // 进度条
   PROGRESS_CHART: {
-    trackColor: '#F5F3F1',
+    trackColor: addOpacity('#FDF0CE', 0.4),
     expenseProgressColor: '#E8A5A5',
     incomeProgressColor: '#95D1B3',
     categoryColor: '#5D5C5A',
@@ -309,7 +321,7 @@ export const LIGHT_COLOR_SCHEME: LightColorScheme = {
   // 详细统计列表
   DETAIL_LIST: {
     sectionTitleColor: '#8E8D8C',
-    itemBackground: '#FAF9F7',
+    itemBackground: addOpacity('#FDF0CE', 0.4),
     categoryColor: '#5D5C5A',
     expenseAmountColor: '#E8A5A5',
     incomeAmountColor: '#95D1B3'
@@ -318,19 +330,19 @@ export const LIGHT_COLOR_SCHEME: LightColorScheme = {
   // 筛选区域
   FILTER_SECTION: {
     labelColor: '#8E8D8C',
-    buttonActiveBackground: '#8FAADC',
+    buttonActiveBackground: addOpacity('#FDF0CE', 0.4),
     buttonActiveTextColor: '#FFFFFF',
-    buttonInactiveBackground: '#F5F3F1',
+    buttonInactiveBackground: addOpacity('#FDF0CE', 0.4),
     buttonInactiveTextColor: '#5D5C5A',
-    categoryActiveBackground: '#8FAADC',
+    categoryActiveBackground: addOpacity('#FDF0CE', 0.4),
     categoryActiveTextColor: '#FFFFFF',
-    categoryInactiveBackground: '#F5F3F1',
+    categoryInactiveBackground: addOpacity('#FDF0CE', 0.4),
     categoryInactiveTextColor: '#5D5C5A'
   } as FilterSectionColors,
 
   // 查询按钮
   QUERY_BUTTON: {
-    backgroundColor: '#8FAADC',
+    backgroundColor: addOpacity('#FDF0CE', 0.4),
     textColor: '#FFFFFF'
   } as QueryButtonColors,
 
@@ -338,8 +350,8 @@ export const LIGHT_COLOR_SCHEME: LightColorScheme = {
   RESULT_SECTION: {
     titleColor: '#5D5C5A',
     emptyTextColor: '#8E8D8C',
-    itemBackground: '#FFFFFF',
-    dividerColor: '#EDECEA'
+    itemBackground: addOpacity('#FDF0CE', 0.4),
+    dividerColor: addOpacity('#FDF0CE', 0.4)
   } as ResultSectionColors
 };
 
@@ -347,41 +359,41 @@ export const LIGHT_COLOR_SCHEME: LightColorScheme = {
 export const DARK_COLOR_SCHEME: LightColorScheme = {
   // 首页导航栏
   NAVBAR: {
-    backgroundColor: '#2D2D2D',
+    backgroundColor: addOpacity('#2D2D2D', 0.4),
     titleColor: '#E8E6E3',
-    buttonBackground: '#7B9BC8',
+    buttonBackground: addOpacity('#7B9BC8', 0.4),
     buttonTextColor: '#FFFFFF',
-    borderColor: '#4A4846',
+    borderColor: addOpacity('#4A4846', 0.4),
     backButtonColor: '#7B9BC8'
   } as NavbarColors,
 
   // 统计卡片
   STAT_CARD: {
-    backgroundColor: '#2D2D2D',
+    backgroundColor: addOpacity('#2D2D2D', 0.4),
     titleColor: '#B8B6B3',
     incomeColor: '#8BC4A6',
     expenseColor: '#D49595',
     balanceColor: '#E8E6E3',
     labelColor: '#B8B6B3',
-    borderColor: '#3A3A3A',
+    borderColor: addOpacity('#3A3A3A', 0.4),
     shadowColor: '#00000020'
   } as StatCardColors,
 
   // 最近记录列表
   RECENT_LIST: {
-    backgroundColor: '#1E1E1E',
-    itemBackground: '#2D2D2D',
+    backgroundColor: addOpacity('#1E1E1E', 0.4),
+    itemBackground: addOpacity('#2D2D2D', 0.4),
     categoryColor: '#E8E6E3',
     descriptionColor: '#B8B6B3',
     incomeAmountColor: '#8BC4A6',
     expenseAmountColor: '#D49595',
     dateColor: '#8A8886',
-    dividerColor: '#3A3836'
+    dividerColor: addOpacity('#3A3836', 0.4)
   } as RecentListColors,
 
   // 标签页导航
   TAB_BAR: {
-    backgroundColor: '#2D2D2D',
+    backgroundColor: addOpacity('#2D2D2D', 0.4),
     activeTextColor: '#7B9BC8',
     inactiveTextColor: '#B8B6B3',
     indicatorColor: '#7B9BC8'
@@ -389,25 +401,25 @@ export const DARK_COLOR_SCHEME: LightColorScheme = {
 
   // 添加记录弹窗 - 弹窗容器
   DIALOG: {
-    backgroundColor: '#2D2D2D',
+    backgroundColor: addOpacity('#2D2D2D', 0.4),
     titleColor: '#E8E6E3',
     closeButtonColor: '#E8E6E3',
-    borderColor: '#4A4846'
+    borderColor: addOpacity('#4A4846', 0.4)
   } as DialogColors,
 
   // 类型选择器
   TYPE_SELECTOR: {
-    activeBackground: '#7B9BC8',
-    activeTextColor: '#FFFFFF',
-    inactiveBackground: '#3A3A3A',
-    inactiveTextColor: '#B8B6B3',
-    expenseActiveBackground: '#D49595',
-    incomeActiveBackground: '#8BC4A6'
+    activeBackground: addOpacity('#7B9BC8', 0.4),
+    activeTextColor: '#E8E6E3',
+    inactiveBackground: addOpacity('#3A3A3A', 0.4),
+    inactiveTextColor: '#E8E6E3',
+    expenseActiveBackground: addOpacity('#7B9BC8', 0.4),
+    incomeActiveBackground: addOpacity('#7B9BC8', 0.4)
   } as TypeSelectorColors,
 
   // 分类选择网格
   CATEGORY_GRID: {
-    itemBackground: '#3A3A3A',
+    itemBackground: addOpacity('#3A3A3A', 0.4),
     activeBackground: '#7B9BC820',
     activeBorderColor: '#7B9BC8',
     iconColor: '#E8E6E3',
@@ -419,8 +431,8 @@ export const DARK_COLOR_SCHEME: LightColorScheme = {
   // 输入区域
   INPUT_SECTION: {
     labelColor: '#B8B6B3',
-    inputBackground: '#3A3A3A',
-    inputBorderColor: '#4A4846',
+    inputBackground: addOpacity('#3A3A3A', 0.4),
+    inputBorderColor: addOpacity('#4A4846', 0.4),
     inputTextColor: '#E8E6E3',
     placeholderColor: '#8A8886',
     errorColor: '#D49595'
@@ -428,49 +440,49 @@ export const DARK_COLOR_SCHEME: LightColorScheme = {
 
   // 按钮区域
   BUTTON_SECTION: {
-    cancelBackground: '#3A3A3A',
+    cancelBackground: addOpacity('#3A3A3A', 0.4),
     cancelTextColor: '#E8E6E3',
-    saveBackground: '#7B9BC8',
-    saveTextColor: '#FFFFFF'
+    saveBackground: addOpacity('#7B9BC8', 0.4),
+    saveTextColor: '#E8E6E3'
   } as ButtonSectionColors,
 
   // 列表容器
   LIST_CONTAINER: {
-    backgroundColor: '#1E1E1E',
+    backgroundColor: addOpacity('#1E1E1E', 0.4),
     emptyTextColor: '#B8B6B3'
   } as ListContainerColors,
 
   // 列表项
   LIST_ITEM: {
-    backgroundColor: '#2D2D2D',
-    swipeDeleteBackground: '#D49595',
+    backgroundColor: addOpacity('#2D2D2D', 0.4),
+    swipeDeleteBackground: addOpacity('#D49595', 0.4),
     deleteTextColor: '#FFFFFF',
     categoryColor: '#E8E6E3',
     descriptionColor: '#B8B6B3',
     amountIncomeColor: '#8BC4A6',
     amountExpenseColor: '#D49595',
     dateColor: '#8A8886',
-    dividerColor: '#3A3836'
+    dividerColor: addOpacity('#3A3836', 0.4)
   } as ListItemColors,
 
   // 月份选择器
   MONTH_PICKER: {
-    backgroundColor: '#2D2D2D',
+    backgroundColor: addOpacity('#2D2D2D', 0.4),
     textColor: '#E8E6E3',
-    buttonBackground: '#3A3A3A',
+    buttonBackground: addOpacity('#3A3A3A', 0.4),
     buttonTextColor: '#E8E6E3'
   } as MonthPickerColors,
 
   // 图表容器
   CHART_CONTAINER: {
-    backgroundColor: '#2D2D2D',
+    backgroundColor: addOpacity('#2D2D2D', 0.4),
     titleColor: '#E8E6E3',
     emptyTextColor: '#B8B6B3'
   } as ChartContainerColors,
 
   // 进度条
   PROGRESS_CHART: {
-    trackColor: '#3A3A3A',
+    trackColor: addOpacity('#3A3A3A', 0.4),
     expenseProgressColor: '#D49595',
     incomeProgressColor: '#8BC4A6',
     categoryColor: '#E8E6E3',
@@ -481,7 +493,7 @@ export const DARK_COLOR_SCHEME: LightColorScheme = {
   // 详细统计列表
   DETAIL_LIST: {
     sectionTitleColor: '#B8B6B3',
-    itemBackground: '#3A3A3A',
+    itemBackground: addOpacity('#3A3A3A', 0.4),
     categoryColor: '#E8E6E3',
     expenseAmountColor: '#D49595',
     incomeAmountColor: '#8BC4A6'
@@ -490,19 +502,19 @@ export const DARK_COLOR_SCHEME: LightColorScheme = {
   // 筛选区域
   FILTER_SECTION: {
     labelColor: '#B8B6B3',
-    buttonActiveBackground: '#7B9BC8',
+    buttonActiveBackground: addOpacity('#7B9BC8', 0.4),
     buttonActiveTextColor: '#FFFFFF',
-    buttonInactiveBackground: '#3A3A3A',
+    buttonInactiveBackground: addOpacity('#3A3A3A', 0.4),
     buttonInactiveTextColor: '#E8E6E3',
-    categoryActiveBackground: '#C9B895',
+    categoryActiveBackground: addOpacity('#C9B895', 0.4),
     categoryActiveTextColor: '#FFFFFF',
-    categoryInactiveBackground: '#3A3A3A',
+    categoryInactiveBackground: addOpacity('#3A3A3A', 0.4),
     categoryInactiveTextColor: '#E8E6E3'
   } as FilterSectionColors,
 
   // 查询按钮
   QUERY_BUTTON: {
-    backgroundColor: '#7B9BC8',
+    backgroundColor: addOpacity('#7B9BC8', 0.4),
     textColor: '#FFFFFF'
   } as QueryButtonColors,
 
@@ -510,7 +522,7 @@ export const DARK_COLOR_SCHEME: LightColorScheme = {
   RESULT_SECTION: {
     titleColor: '#E8E6E3',
     emptyTextColor: '#B8B6B3',
-    itemBackground: '#2D2D2D',
-    dividerColor: '#3A3836'
+    itemBackground: addOpacity('#2D2D2D', 0.4),
+    dividerColor: addOpacity('#3A3836', 0.4)
   } as ResultSectionColors
 };

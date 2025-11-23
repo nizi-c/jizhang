@@ -68,7 +68,7 @@ export struct QueryPage {
             Button('收入')
               .width('30%')
               .height(36)
-              .backgroundColor(this.queryType === 'income' ? '#6BCB77' : COLORS.background)
+              .backgroundColor(this.queryType === 'income' ? COLORS.primary : COLORS.background)
               .fontColor(this.queryType === 'income' ? '#FFFFFF' : COLORS.text)
               .fontSize(12)
               .onClick(() => {

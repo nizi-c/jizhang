@@ -329,7 +329,6 @@ struct RecordsPage {
       }
       .width('100%')
       .padding({ top: 8, bottom: 8 })
-      .backgroundColor(this.getColorScheme().CHART_CONTAINER.backgroundColor)
 
       // 日历网格
       if (this.selectedDate === '') {
@@ -341,7 +340,6 @@ struct RecordsPage {
         }
         .width('100%')
         .layoutWeight(1)
-        .backgroundColor(this.getColorScheme().LIST_CONTAINER.backgroundColor)
       } else {
         // 显示选中日期的记录
         Column() {
@@ -357,7 +355,6 @@ struct RecordsPage {
           }
           .width('100%')
           .padding(12)
-          .backgroundColor(this.getColorScheme().CHART_CONTAINER.backgroundColor)
 
           if (this.selectedDateRecords.length === 0) {
             Column() {
@@ -383,7 +380,6 @@ struct RecordsPage {
         }
         .width('100%')
         .layoutWeight(1)
-        .backgroundColor(this.getColorScheme().LIST_CONTAINER.backgroundColor)
       }
     }
     .width('100%')
