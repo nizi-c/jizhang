@@ -4,6 +4,7 @@ import { AccountRecord } from '../models/AccountRecord';
 import { BudgetUtil } from '../utils/BudgetUtil';
 import { StorageUtil } from '../utils/StorageUtil';
 import { ThemeUtil } from '../utils/ThemeUtil';
+import { CategoryUtil } from '../utils/CategoryUtil';
 import { LIGHT_COLOR_SCHEME, DARK_COLOR_SCHEME } from '../constants/ColorSchemes';
 import { EXPENSE_CATEGORIES, Category } from '../constants/Constants';
 import router from '@ohos.router';
@@ -24,17 +25,26 @@ struct BudgetPage {
   @State totalUsed: number = 0;
   @State totalRemaining: number = 0;
   @State totalPercentage: number = 0;
+  @State availableCategories: Category[] = [];
+  @State showCustomCategoryDialog: boolean = false;
+  @State customCategoryName: string = '';
 
   async aboutToAppear() {
     const context = getContext(this) as common.UIAbilityContext;
     await BudgetUtil.init(context);
     await this.loadData();
+    await this.loadCategories();
   }
 
   async loadData() {
     this.budgets = await BudgetUtil.getAllBudgets();
     this.records = await StorageUtil.getRecords();
     this.calculateProgress();
+  }
+
+  async loadCategories() {
+    const customCategories = await CategoryUtil.getCustomCategories();
+    this.availableCategories = [...EXPENSE_CATEGORIES, ...customCategories];
   }
 
   calculateProgress() {
@@ -127,6 +137,29 @@ struct BudgetPage {
     }
   }
 
+  getCategoryColor(category: string): string {
+    const colors = [
+      '#E8A5A5', // 食物 - 红色系
+      '#8FAADC', // 交通 - 蓝色系
+      '#E8C9A5', // 娱乐 - 橙色系
+      '#C9B6D6', // 购物 - 紫色系
+      '#95D1B3', // 医疗 - 绿色系
+      '#A5C8E8', // 教育 - 浅蓝色
+      '#B8B5B2', // 住房 - 灰色系
+      '#D6C9B6', // 其他 - 棕色系
+      '#FFB6C1', // 额外颜色1
+      '#98D8C8'  // 额外颜色2
+    ];
+    
+    // 根据分类名称生成一个稳定的索引
+    let hash = 0;
+    for (let i = 0; i < category.length; i++) {
+      hash = category.charCodeAt(i) + ((hash << 5) - hash);
+    }
+    const index = Math.abs(hash) % colors.length;
+    return colors[index];
+  }
+
   build() {
     Column() {
       // 导航栏
@@ -200,6 +233,11 @@ struct BudgetPage {
           .backgroundColor(this.getColorScheme().STAT_CARD.backgroundColor)
           .borderRadius(12).margin({ bottom: 16 })
 
+          // 预算占比环形图
+          if (this.budgetProgresses.length > 0) {
+            this.buildBudgetPieChart()
+          }
+
           // 预算列表
           if (this.budgetProgresses.length === 0) {
             Column() {
@@ -221,11 +259,96 @@ struct BudgetPage {
       if (this.showAddDialog) {
         this.buildAddDialog()
       }
+
+      // 自定义分类对话框
+      if (this.showCustomCategoryDialog) {
+        this.buildCustomCategoryDialog()
+      }
     }
     .width('100%').height('100%')
     .backgroundImage(ThemeUtil.getBackgroundImage(ThemeUtil.getTheme()))
     .backgroundImageSize(ImageSize.Cover)
     .backgroundImagePosition(Alignment.Center)
+  }
+
+  @Builder
+  buildBudgetPieChart() {
+    Column() {
+      Text('预算分类占比')
+        .fontSize(16).fontWeight(FontWeight.Bold)
+        .fontColor(this.getColorScheme().CHART_CONTAINER.titleColor)
+        .margin({ bottom: 16 })
+
+      // 环形图可视化
+      Stack() {
+        ForEach(this.budgetProgresses.slice(0, 5), (progress: BudgetProgress, index: number) => {
+          Progress({
+            value: (progress.budgetAmount / this.totalBudget) * 100,
+            total: 100,
+            type: ProgressType.Ring
+          })
+            .width(180 - index * 20)
+            .height(180 - index * 20)
+            .color(this.getCategoryColor(progress.category))
+            .style({ strokeWidth: 15 })
+        }, (progress: BudgetProgress) => progress.budgetId)
+
+        // 中心显示总预算
+        Column() {
+          Text('总预算')
+            .fontSize(12)
+            .fontColor(this.getColorScheme().LIST_ITEM.descriptionColor)
+          Text(`¥${this.totalBudget.toFixed(0)}`)
+            .fontSize(18)
+            .fontWeight(FontWeight.Bold)
+            .fontColor(this.getColorScheme().LIST_ITEM.categoryColor)
+        }
+      }
+      .width('100%')
+      .height(180)
+      .alignContent(Alignment.Center)
+      .margin({ bottom: 16 })
+
+      // 图例
+      Column() {
+        ForEach(this.budgetProgresses, (progress: BudgetProgress) => {
+          Row() {
+            Row()
+              .width(12)
+              .height(12)
+              .backgroundColor(this.getCategoryColor(progress.category))
+              .borderRadius(2)
+              .margin({ right: 8 })
+
+            Text(progress.category)
+              .fontSize(14)
+              .fontColor(this.getColorScheme().LIST_ITEM.categoryColor)
+              .layoutWeight(1)
+
+            Text(`${((progress.budgetAmount / this.totalBudget) * 100).toFixed(1)}%`)
+              .fontSize(12)
+              .fontColor(this.getColorScheme().LIST_ITEM.descriptionColor)
+              .margin({ right: 8 })
+
+            Text(`¥${progress.budgetAmount.toFixed(0)}`)
+              .fontSize(14)
+              .fontWeight(FontWeight.Bold)
+              .fontColor(this.getColorScheme().LIST_ITEM.categoryColor)
+          }
+          .width('100%')
+          .padding(12)
+          .backgroundColor(this.getColorScheme().LIST_ITEM.backgroundColor)
+          .borderRadius(8)
+          .margin({ bottom: 8 })
+        }, (progress: BudgetProgress) => progress.budgetId)
+      }
+      .width('100%')
+    }
+    .width('100%')
+    .padding(16)
+    .backgroundColor(this.getColorScheme().CHART_CONTAINER.backgroundColor)
+    .borderRadius(12)
+    .margin({ bottom: 16 })
   }
 
   @Builder
@@ -302,7 +425,7 @@ struct BudgetPage {
 
         Scroll() {
           Row() {
-            ForEach(EXPENSE_CATEGORIES, (cat: Category) => {
+            ForEach(this.availableCategories, (cat: Category) => {
               Button() {
                 Column() {
                   Text(cat.icon).fontSize(20)
@@ -316,6 +439,29 @@ struct BudgetPage {
               .borderRadius(8).margin({ right: 8 })
               .onClick(() => { this.newCategory = cat.name; })
             }, (cat: Category) => cat.name)
+            
+            // 添加自定义分类按钮
+            Column() {
+              Text('➕')
+                .fontSize(24)
+                .margin({ bottom: 4 })
+              Text('自定义')
+                .fontSize(10)
+                .fontColor(this.getColorScheme().CATEGORY_GRID.textColor)
+            }
+            .width(60)
+            .height(60)
+            .padding(8)
+            .backgroundColor(this.getColorScheme().CATEGORY_GRID.itemBackground)
+            .borderRadius(8)
+            .border({
+              width: 1,
+              color: this.getColorScheme().CATEGORY_GRID.activeBorderColor,
+              style: BorderStyle.Dashed
+            })
+            .onClick(() => {
+              this.showCustomCategoryDialog = true;
+            })
           }
         }
         .scrollable(ScrollDirection.Horizontal).scrollBar(BarState.Off)
@@ -390,5 +536,81 @@ struct BudgetPage {
     .backgroundColor('#00000040')
     .justifyContent(FlexAlign.Center)
     .onClick(() => { this.showAddDialog = false; })
+  }
+
+  @Builder
+  buildCustomCategoryDialog() {
+    Column() {
+      Column() {
+        Text('添加自定义分类')
+          .fontSize(16)
+          .fontWeight(FontWeight.Bold)
+          .fontColor(this.getColorScheme().DIALOG.titleColor)
+          .margin({ bottom: 16 })
+
+        TextInput({ placeholder: '请输入分类名称', text: this.customCategoryName })
+          .width('100%')
+          .height(44)
+          .backgroundColor(this.getColorScheme().INPUT_SECTION.inputBackground)
+          .borderRadius(8)
+          .onChange((value: string) => {
+            this.customCategoryName = value;
+          })
+          .margin({ bottom: 16 })
+
+        Row() {
+          Button('取消')
+            .width('48%')
+            .height(40)
+            .backgroundColor(this.getColorScheme().BUTTON_SECTION.cancelBackground)
+            .fontColor(this.getColorScheme().BUTTON_SECTION.cancelTextColor)
+            .onClick(() => {
+              this.showCustomCategoryDialog = false;
+              this.customCategoryName = '';
+            })
+
+          Row().width('4%')
+
+          Button('确定')
+            .width('48%')
+            .height(40)
+            .backgroundColor(this.getColorScheme().BUTTON_SECTION.saveBackground)
+            .fontColor(this.getColorScheme().BUTTON_SECTION.saveTextColor)
+            .onClick(async () => {
+              if (this.customCategoryName) {
+                // 添加自定义分类到存储
+                const newCategory: Category = {
+                  name: this.customCategoryName,
+                  icon: '📌',
+                  color: '#B8B5B2'
+                };
+                await CategoryUtil.addCustomCategory(newCategory);
+                
+                // 重新加载分类列表
+                await this.loadCategories();
+                this.newCategory = this.customCategoryName;
+                this.showCustomCategoryDialog = false;
+                this.customCategoryName = '';
+                
+                promptAction.showToast({
+                  message: '自定义分类已添加',
+                  duration: 1500
+                });
+              }
+            })
+        }
+        .width('100%')
+      }
+      .width('80%')
+      .padding(20)
+      .backgroundColor(this.getColorScheme().DIALOG.backgroundColor)
+      .borderRadius(12)
+      .shadow({ radius: 20, color: '#00000040' })
+    }
+    .width('100%')
+    .height('100%')
+    .backgroundColor('#00000040')
+    .justifyContent(FlexAlign.Center)
+    .onClick(() => { this.showCustomCategoryDialog = false; })
   }
 }

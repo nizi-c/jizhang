@@ -630,7 +630,7 @@ struct RecordsPage {
           .margin({ bottom: 8 })
 
         Row() {
-          TextInput({ placeholder: '开始日期 YYYY-MM-DD', text: this.startDate })
+          TextInput({ placeholder: '开始日期 ', text: this.startDate })
             .width('48%')
             .height(40)
             .padding({ left: 10, right: 10 })
@@ -657,7 +657,7 @@ struct RecordsPage {
 
           Row().width('4%')
 
-          TextInput({ placeholder: '结束日期 YYYY-MM-DD', text: this.endDate })
+          TextInput({ placeholder: '结束日期 ', text: this.endDate })
             .width('48%')
             .height(40)
             .padding({ left: 10, right: 10 })

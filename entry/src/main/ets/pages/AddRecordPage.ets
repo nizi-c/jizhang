@@ -6,6 +6,7 @@ import { LIGHT_COLOR_SCHEME, DARK_COLOR_SCHEME } from '../constants/ColorSchemes
 import { ThemeUtil } from '../utils/ThemeUtil';
 import { BudgetUtil } from '../utils/BudgetUtil';
 import { Budget } from '../models/Budget';
+import { CategoryUtil } from '../utils/CategoryUtil';
 import router from '@ohos.router';
 import promptAction from '@ohos.promptAction';
 import common from '@ohos.app.ability.common';
@@ -27,12 +28,20 @@ struct AddRecordPage {
     const context = getContext(this) as common.UIAbilityContext;
     StorageUtil.setContext(context);
     await BudgetUtil.init(context);
-    this.updateCategories();
+    await this.updateCategories();
   }
 
-  updateCategories() {
-    this.categories = this.recordType === 'income' ? INCOME_CATEGORIES : EXPENSE_CATEGORIES;
-    this.selectedCategory = this.categories[0]?.name || '';
+  async updateCategories() {
+    const baseCategories = this.recordType === 'income' ? INCOME_CATEGORIES : EXPENSE_CATEGORIES;
+    const customCategories = await CategoryUtil.getCustomCategories();
+    
+    // 合并基础分类和自定义分类（只显示支出类型的自定义分类）
+    const expenseCustom = customCategories.filter(c => this.recordType === 'expense');
+    this.categories = [...baseCategories, ...expenseCustom];
+    
+    if (!this.selectedCategory || !this.categories.find(c => c.name === this.selectedCategory)) {
+      this.selectedCategory = this.categories[0]?.name || '';
+    }
   }
 
   getColorScheme() {
@@ -440,18 +449,26 @@ struct AddRecordPage {
               .height(40)
               .backgroundColor(this.getColorScheme().BUTTON_SECTION.saveBackground)
               .fontColor(this.getColorScheme().BUTTON_SECTION.saveTextColor)
-              .onClick(() => {
+              .onClick(async () => {
                 if (this.customCategoryName) {
-                  // 添加自定义分类到当前分类列表
+                  // 添加自定义分类到存储
                   const newCategory: Category = {
                     name: this.customCategoryName,
                     icon: '📌',
                     color: '#B8B5B2'
                   };
-                  this.categories.push(newCategory);
+                  await CategoryUtil.addCustomCategory(newCategory);
+                  
+                  // 重新加载分类列表
+                  await this.updateCategories();
                   this.selectedCategory = this.customCategoryName;
                   this.showCustomCategoryDialog = false;
                   this.customCategoryName = '';
+                  
+                  promptAction.showToast({
+                    message: '自定义分类已添加',
+                    duration: 1500
+                  });
                 }
               })
           }
