@@ -1,8 +1,10 @@
 import { AccountRecord } from '../models/AccountRecord';
 import { AccountViewModel, QueryFilters } from '../viewmodel/AccountViewModel';
 import { COLORS, EXPENSE_CATEGORIES, INCOME_CATEGORIES, Category } from '../constants/Constants';
+import { LIGHT_COLOR_SCHEME, DARK_COLOR_SCHEME } from '../constants/ColorSchemes';
 import { StorageUtil } from '../utils/StorageUtil';
 import { ThemeUtil } from '../utils/ThemeUtil';
+import { CategoryUtil } from '../utils/CategoryUtil';
 import router from '@ohos.router';
 
 @Entry
@@ -18,15 +20,36 @@ struct QueryPageEntry {
   @State endDate: string = '';
   @State queryResults: AccountRecord[] = [];
   @State hasQueried: boolean = false;
+  @State availableCategories: Category[] = [];
 
-  aboutToAppear() {
+  async aboutToAppear() {
     StorageUtil.setContext(getContext(this));
-    this.loadRecords();
+    await this.loadRecords();
+    await this.loadCategories();
+  }
+
+  onPageShow() {
+    this.loadCategories();
   }
 
   async loadRecords() {
     this.records = await StorageUtil.getRecords();
     this.viewModel.records = this.records;
+  }
+
+  async loadCategories() {
+    const customCategories = await CategoryUtil.getCustomCategories();
+    if (this.queryType === 'income') {
+      this.availableCategories = INCOME_CATEGORIES;
+    } else if (this.queryType === 'expense') {
+      this.availableCategories = [...EXPENSE_CATEGORIES, ...customCategories];
+    } else {
+      this.availableCategories = [...INCOME_CATEGORIES, ...EXPENSE_CATEGORIES, ...customCategories];
+    }
+  }
+
+  getColorScheme() {
+    return ThemeUtil.getTheme() === 'light' ? LIGHT_COLOR_SCHEME : DARK_COLOR_SCHEME;
   }
 
   build() {
@@ -36,11 +59,11 @@ struct QueryPageEntry {
         Button({ type: ButtonType.Circle, stateEffect: true }) {
           Text('←')
             .fontSize(20)
-            .fontColor(COLORS.text)
+            .fontColor(this.getColorScheme().NAVBAR.backButtonColor)
         }
         .width(36)
         .height(36)
-        .backgroundColor(COLORS.background)
+        .backgroundColor(this.getColorScheme().NAVBAR.backgroundColor)
         .onClick(() => {
           router.back();
         })
@@ -48,26 +71,17 @@ struct QueryPageEntry {
         Text('查询')
           .fontSize(18)
           .fontWeight(FontWeight.Bold)
-          .fontColor(COLORS.text)
+          .fontColor(this.getColorScheme().NAVBAR.titleColor)
           .layoutWeight(1)
           .textAlign(TextAlign.Center)
 
-        Button({ type: ButtonType.Circle, stateEffect: true }) {
-          Text('✓')
-            .fontSize(20)
-            .fontColor('#FFFFFF')
-        }
-        .width(36)
-        .height(36)
-        .backgroundColor(COLORS.primary)
-        .onClick(() => {
-          this.applyFilters();
-          router.back();
-        })
+        Row()
+          .width(36)
       }
       .width('100%')
-      .padding({ left: 16, right: 16, top: 12, bottom: 12 })
-      .backgroundColor('#FFFFFF')
+      .padding({ left: 16, right: 16, top: 8, bottom: 8 })
+      .backgroundColor(this.getColorScheme().NAVBAR.backgroundColor)
+      .border({ width: { bottom: 1 }, color: this.getColorScheme().NAVBAR.borderColor })
 
       Scroll() {
         Column() {
@@ -86,6 +100,7 @@ struct QueryPageEntry {
               .fontSize(12)
               .onClick(() => {
                 this.queryType = 'all';
+                this.loadCategories();
               })
 
             Row()
@@ -99,6 +114,7 @@ struct QueryPageEntry {
               .fontSize(12)
               .onClick(() => {
                 this.queryType = 'expense';
+                this.loadCategories();
               })
 
             Row()
@@ -112,6 +128,7 @@ struct QueryPageEntry {
               .fontSize(12)
               .onClick(() => {
                 this.queryType = 'income';
+                this.loadCategories();
               })
           }
           .width('100%')
@@ -123,37 +140,64 @@ struct QueryPageEntry {
             .fontColor(COLORS.textLight)
             .margin({ bottom: 8 })
 
-          Scroll() {
-            Row() {
-              Button('全部')
-                .width(60)
-                .height(36)
-                .backgroundColor(this.selectedCategory === '' ? COLORS.primary : COLORS.background)
-                .fontColor(this.selectedCategory === '' ? '#FFFFFF' : COLORS.text)
-                .fontSize(11)
-                .onClick(() => {
-                  this.selectedCategory = '';
-                })
-                .margin({ right: 8 })
+          // 分类输入框
+          TextInput({ placeholder: '输入分类名称', text: this.selectedCategory })
+            .width('100%')
+            .height(40)
+            .padding({ left: 10, right: 10 })
+            .backgroundColor(COLORS.inputBg)
+            .borderRadius(6)
+            .onChange((value: string) => {
+              this.selectedCategory = value;
+            })
+            .margin({ bottom: 8 })
 
-              ForEach(this.getAvailableCategories(), (category: Category) => {
-                Button(category.name)
+          // 分类横向滚动区域
+          Column() {
+            Scroll() {
+              Row() {
+                Button('全部')
                   .width(60)
-                  .height(36)
-                  .backgroundColor(this.selectedCategory === category.name ? category.color : COLORS.background)
-                  .fontColor(this.selectedCategory === category.name ? '#FFFFFF' : COLORS.text)
-                  .fontSize(11)
+                  .height(60)
+                  .backgroundColor(this.selectedCategory === '' ? COLORS.primary : COLORS.background)
+                  .fontColor(this.selectedCategory === '' ? '#FFFFFF' : COLORS.text)
+                  .fontSize(12)
+                  .borderRadius(8)
+                  .onClick(() => {
+                    this.selectedCategory = '';
+                  })
+                  .margin({ right: 8 })
+
+                ForEach(this.getAvailableCategories(), (category: Category) => {
+                  Button() {
+                    Column() {
+                      Text(category.icon)
+                        .fontSize(20)
+                        .margin({ bottom: 4 })
+                      Text(category.name)
+                        .fontSize(10)
+                        .fontColor(this.selectedCategory === category.name ? '#FFFFFF' : COLORS.text)
+                    }
+                  }
+                  .width(60)
+                  .height(60)
+                  .backgroundColor(this.selectedCategory === category.name ? COLORS.primary : COLORS.background)
+                  .borderRadius(8)
                   .onClick(() => {
                     this.selectedCategory = category.name;
                   })
                   .margin({ right: 8 })
-              }, (category: Category) => category.name)
+                }, (category: Category) => category.name)
+              }
+              .height(70)
             }
+            .scrollable(ScrollDirection.Horizontal)
+            .scrollBar(BarState.Off)
             .width('100%')
-            .margin({ bottom: 16 })
+            .height(70)
           }
-          .scrollable(ScrollDirection.Horizontal)
-          .scrollBar(BarState.Off)
+          .width('100%')
+          .margin({ bottom: 16 })
 
           // 金额范围
           Text('金额范围')
@@ -197,7 +241,7 @@ struct QueryPageEntry {
             .margin({ bottom: 8 })
 
           Row() {
-            TextInput({ placeholder: '开始日期 ' })
+            TextInput({ placeholder: '开始日期', text: this.startDate })
               .width('48%')
               .height(40)
               .padding({ left: 10, right: 10 })
@@ -206,11 +250,24 @@ struct QueryPageEntry {
               .onChange((value: string) => {
                 this.startDate = value;
               })
+              .onClick(() => {
+                DatePickerDialog.show({
+                  selected: this.startDate ? new Date(this.startDate) : new Date(),
+                  onAccept: (value: DatePickerResult) => {
+                    if (value.year !== undefined && value.month !== undefined && value.day !== undefined) {
+                      const year = value.year;
+                      const month = String(value.month + 1).padStart(2, '0');
+                      const day = String(value.day).padStart(2, '0');
+                      this.startDate = `${year}-${month}-${day}`;
+                    }
+                  }
+                });
+              })
 
             Row()
               .width('4%')
 
-            TextInput({ placeholder: '结束日期 ' })
+            TextInput({ placeholder: '结束日期', text: this.endDate })
               .width('48%')
               .height(40)
               .padding({ left: 10, right: 10 })
@@ -219,22 +276,53 @@ struct QueryPageEntry {
               .onChange((value: string) => {
                 this.endDate = value;
               })
+              .onClick(() => {
+                DatePickerDialog.show({
+                  selected: this.endDate ? new Date(this.endDate) : new Date(),
+                  onAccept: (value: DatePickerResult) => {
+                    if (value.year !== undefined && value.month !== undefined && value.day !== undefined) {
+                      const year = value.year;
+                      const month = String(value.month + 1).padStart(2, '0');
+                      const day = String(value.day).padStart(2, '0');
+                      this.endDate = `${year}-${month}-${day}`;
+                    }
+                  }
+                });
+              })
           }
           .width('100%')
           .margin({ bottom: 24 })
 
           // 查询按钮
-          Button('查询')
-            .width('100%')
-            .height(44)
-            .backgroundColor(COLORS.primary)
-            .fontColor('#FFFFFF')
-            .fontSize(14)
-            .fontWeight(FontWeight.Bold)
-            .onClick(() => {
-              this.performQuery();
-            })
-            .margin({ bottom: 16 })
+          Row() {
+            Button('重置')
+              .width('30%')
+              .height(44)
+              .backgroundColor('#F5F5F5')
+              .fontColor('#333333')
+              .fontSize(14)
+              .borderRadius(8)
+              .onClick(() => {
+                this.resetQuery();
+              })
+
+            Row().width('5%')
+
+            Button('确定查询')
+              .width('65%')
+              .height(44)
+              .backgroundColor(COLORS.primary)
+              .fontColor('#FFFFFF')
+              .fontSize(14)
+              .fontWeight(FontWeight.Bold)
+              .borderRadius(8)
+              .onClick(() => {
+                this.performQuery();
+              })
+          }
+          .width('100%')
+          .justifyContent(FlexAlign.SpaceBetween)
+          .margin({ bottom: 16 })
 
           // 查询结果
           if (this.hasQueried) {
@@ -258,13 +346,20 @@ struct QueryPageEntry {
                     ListItem() {
                       Row() {
                         Column() {
-                          Text(record.category)
-                            .fontSize(13)
-                            .fontWeight(FontWeight.Bold)
-                            .fontColor(COLORS.text)
+                          Row() {
+                            Text(record.category)
+                              .fontSize(14)
+                              .fontWeight(FontWeight.Bold)
+                              .fontColor(this.getColorScheme().LIST_ITEM.categoryColor)
+                            if (record.mood) {
+                              Text(record.mood.substring(0, 2))
+                                .fontSize(14)
+                                .margin({ left: 6 })
+                            }
+                          }
                           Text(record.description)
-                            .fontSize(11)
-                            .fontColor(COLORS.textLight)
+                            .fontSize(12)
+                            .fontColor(this.getColorScheme().LIST_ITEM.descriptionColor)
                             .margin({ top: 4 })
                         }
                         .layoutWeight(1)
@@ -272,19 +367,21 @@ struct QueryPageEntry {
 
                         Column() {
                           Text(`${record.type === 'income' ? '+' : '-'}¥${record.amount.toFixed(2)}`)
-                            .fontSize(13)
+                            .fontSize(14)
                             .fontWeight(FontWeight.Bold)
-                            .fontColor(record.type === 'income' ? '#6BCB77' : COLORS.primary)
+                            .fontColor(record.type === 'income' ? 
+                              this.getColorScheme().LIST_ITEM.amountIncomeColor : 
+                              this.getColorScheme().LIST_ITEM.amountExpenseColor)
                           Text(record.dateStr)
-                            .fontSize(11)
-                            .fontColor(COLORS.textLight)
+                            .fontSize(12)
+                            .fontColor(this.getColorScheme().LIST_ITEM.dateColor)
                             .margin({ top: 4 })
                         }
                         .alignItems(HorizontalAlign.End)
                       }
                       .width('100%')
                       .padding(12)
-                      .backgroundColor('#FFFFFF')
+                      .backgroundColor(this.getColorScheme().LIST_ITEM.backgroundColor)
                     }
                   }, (record: AccountRecord) => record.id)
                 }
@@ -313,12 +410,18 @@ struct QueryPageEntry {
   }
 
   private getAvailableCategories(): Category[] {
-    if (this.queryType === 'income') {
-      return INCOME_CATEGORIES;
-    } else if (this.queryType === 'expense') {
-      return EXPENSE_CATEGORIES;
-    }
-    return [...INCOME_CATEGORIES, ...EXPENSE_CATEGORIES];
+    return this.availableCategories;
+  }
+
+  private resetQuery(): void {
+    this.queryType = 'all';
+    this.selectedCategory = '';
+    this.minAmount = '';
+    this.maxAmount = '';
+    this.startDate = '';
+    this.endDate = '';
+    this.queryResults = [];
+    this.hasQueried = false;
   }
 
   private performQuery(): void {

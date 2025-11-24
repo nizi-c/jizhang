@@ -96,44 +96,51 @@ export struct QueryPage {
             })
             .margin({ bottom: 8 })
 
-          Scroll() {
-            Row() {
-              Button('全部')
-                .width(60)
-                .height(36)
-                .backgroundColor(this.selectedCategory === '' ? COLORS.primary : COLORS.background)
-                .fontColor(this.selectedCategory === '' ? '#FFFFFF' : COLORS.text)
-                .fontSize(11)
-                .onClick(() => {
-                  this.selectedCategory = '';
-                })
-                .margin({ right: 8 })
+          Column() {
+            Scroll() {
+              Row() {
+                Button('全部')
+                  .width(60)
+                  .height(60)
+                  .backgroundColor(this.selectedCategory === '' ? COLORS.primary : COLORS.background)
+                  .fontColor(this.selectedCategory === '' ? '#FFFFFF' : COLORS.text)
+                  .fontSize(12)
+                  .borderRadius(8)
+                  .onClick(() => {
+                    this.selectedCategory = '';
+                  })
+                  .margin({ right: 8 })
 
-              ForEach(this.getAvailableCategories(), (category: Category) => {
-                Button() {
-                  Column() {
-                    Text(category.icon)
-                      .fontSize(16)
-                    Text(category.name)
-                      .fontSize(10)
-                      .fontColor(COLORS.text)
+                ForEach(this.getAvailableCategories(), (category: Category) => {
+                  Button() {
+                    Column() {
+                      Text(category.icon)
+                        .fontSize(20)
+                        .margin({ bottom: 4 })
+                      Text(category.name)
+                        .fontSize(10)
+                        .fontColor(this.selectedCategory === category.name ? '#FFFFFF' : COLORS.text)
+                    }
                   }
-                }
-                .width(60)
-                .height(60)
-                .backgroundColor(this.selectedCategory === category.name ? '#CCFDF0CE' : COLORS.background)
-                .borderRadius(8)
-                .onClick(() => {
-                  this.selectedCategory = category.name;
-                })
-                .margin({ right: 8 })
-              }, (category: Category) => category.name)
+                  .width(60)
+                  .height(60)
+                  .backgroundColor(this.selectedCategory === category.name ? COLORS.primary : COLORS.background)
+                  .borderRadius(8)
+                  .onClick(() => {
+                    this.selectedCategory = category.name;
+                  })
+                  .margin({ right: 8 })
+                }, (category: Category) => category.name)
+              }
+              .height(70)
             }
+            .scrollable(ScrollDirection.Horizontal)
+            .scrollBar(BarState.Off)
             .width('100%')
-            .margin({ bottom: 16 })
+            .height(70)
           }
-          .scrollable(ScrollDirection.Horizontal)
-          .scrollBar(BarState.Off)
+          .width('100%')
+          .margin({ bottom: 16 })
 
           // 金额范围
           Text('金额范围')
@@ -230,17 +237,35 @@ export struct QueryPage {
           .margin({ bottom: 24 })
 
           // 查询按钮
-          Button('查询')
-            .width('100%')
-            .height(44)
-            .backgroundColor(COLORS.primary)
-            .fontColor('#FFFFFF')
-            .fontSize(14)
-            .fontWeight(FontWeight.Bold)
-            .onClick(() => {
-              this.performQuery();
-            })
-            .margin({ bottom: 16 })
+          Row() {
+            Button('重置')
+              .width('30%')
+              .height(44)
+              .backgroundColor('#F5F5F5')
+              .fontColor('#333333')
+              .fontSize(14)
+              .borderRadius(8)
+              .onClick(() => {
+                this.resetQuery();
+              })
+
+            Row().width('5%')
+
+            Button('确定查询')
+              .width('65%')
+              .height(44)
+              .backgroundColor(COLORS.primary)
+              .fontColor('#FFFFFF')
+              .fontSize(14)
+              .fontWeight(FontWeight.Bold)
+              .borderRadius(8)
+              .onClick(() => {
+                this.performQuery();
+              })
+          }
+          .width('100%')
+          .justifyContent(FlexAlign.SpaceBetween)
+          .margin({ bottom: 16 })
 
           // 查询结果
           if (this.hasQueried) {
@@ -325,6 +350,17 @@ export struct QueryPage {
       return EXPENSE_CATEGORIES;
     }
     return [...INCOME_CATEGORIES, ...EXPENSE_CATEGORIES];
+  }
+
+  private resetQuery(): void {
+    this.queryType = 'all';
+    this.selectedCategory = '';
+    this.minAmount = '';
+    this.maxAmount = '';
+    this.startDate = '';
+    this.endDate = '';
+    this.queryResults = [];
+    this.hasQueried = false;
   }
 
   private performQuery(): void {

@@ -185,38 +185,38 @@ interface LightColorScheme {
 }
 
 export const LIGHT_COLOR_SCHEME: LightColorScheme = {
-  // 首页导航栏
+  // 首页导航栏 - 白色半透明
   NAVBAR: {
-    backgroundColor: addOpacity('#FDF0CE', 0.4),
+    backgroundColor: addOpacity('#FFFFFF', 0.4),
     titleColor: '#5D5C5A',
-    buttonBackground: addOpacity('#FDF0CE', 0.4),
+    buttonBackground: addOpacity('#FFFFFF', 0.4),
     buttonTextColor: '#FFFFFF',
-    borderColor: addOpacity('#FDF0CE', 0.4),
+    borderColor: addOpacity('#FFFFFF', 0.4),
     backButtonColor: '#5D5C5A'
   } as NavbarColors,
 
-  // 统计卡片
+  // 统计卡片 - 白色半透明
   STAT_CARD: {
-    backgroundColor: addOpacity('#FDF0CE', 0.4),
+    backgroundColor: addOpacity('#FFFFFF', 0.4),
     titleColor: '#8E8D8C',
     incomeColor: '#95D1B3',
     expenseColor: '#E8A5A5',
     balanceColor: '#5D5C5A',
     labelColor: '#8E8D8C',
-    borderColor: addOpacity('#FDF0CE', 0.4),
+    borderColor: addOpacity('#FFFFFF', 0.4),
     shadowColor: '#00000008'
   } as StatCardColors,
 
-  // 最近记录列表
+  // 最近记录列表 - 白色半透明
   RECENT_LIST: {
-    backgroundColor: addOpacity('#FDF0CE', 0.4),
-    itemBackground: addOpacity('#FDF0CE', 0.4),
+    backgroundColor: addOpacity('#FFFFFF', 0.4),
+    itemBackground: addOpacity('#FFFFFF', 0.4),
     categoryColor: '#5D5C5A',
     descriptionColor: '#8E8D8C',
     incomeAmountColor: '#95D1B3',
     expenseAmountColor: '#E8A5A5',
     dateColor: '#B4B3B2',
-    dividerColor: addOpacity('#FDF0CE', 0.4)
+    dividerColor: addOpacity('#FFFFFF', 0.4)
   } as RecentListColors,
 
   // 标签页导航

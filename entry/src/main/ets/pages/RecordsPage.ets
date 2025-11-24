@@ -274,7 +274,7 @@ struct RecordsPage {
         .height(36)
         .backgroundColor(this.getColorScheme().NAVBAR.buttonBackground)
         .onClick(() => {
-          this.showFilters = !this.showFilters;
+          router.pushUrl({ url: 'pages/QueryPageEntry' });
         })
       }
       .width('100%')
@@ -712,10 +712,17 @@ struct RecordsPage {
   buildRecordItem(record: AccountRecord) {
     Row() {
       Column() {
-        Text(record.category)
-          .fontSize(14)
-          .fontWeight(FontWeight.Bold)
-          .fontColor(this.getColorScheme().LIST_ITEM.categoryColor)
+        Row() {
+          Text(record.category)
+            .fontSize(14)
+            .fontWeight(FontWeight.Bold)
+            .fontColor(this.getColorScheme().LIST_ITEM.categoryColor)
+          if (record.mood) {
+            Text(record.mood.substring(0, 2))
+              .fontSize(14)
+              .margin({ left: 6 })
+          }
+        }
         Text(record.description)
           .fontSize(12)
           .fontColor(this.getColorScheme().LIST_ITEM.descriptionColor)

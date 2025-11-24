@@ -210,6 +210,19 @@ struct AddRecordPage {
             .fontColor(this.getColorScheme().INPUT_SECTION.labelColor)
             .margin({ bottom: 8 })
 
+          // 分类输入框
+          TextInput({ placeholder: '输入分类名称', text: this.selectedCategory })
+            .width('100%')
+            .height(44)
+            .padding({ left: 12, right: 12 })
+            .backgroundColor(this.getColorScheme().INPUT_SECTION.inputBackground)
+            .borderRadius(8)
+            .placeholderColor(this.getColorScheme().INPUT_SECTION.placeholderColor)
+            .onChange((value: string) => {
+              this.selectedCategory = value;
+            })
+            .margin({ bottom: 8 })
+
           Scroll() {
             Row() {
               ForEach(this.categories, (category: Category) => {
@@ -415,70 +428,79 @@ struct AddRecordPage {
       // 自定义分类对话框
       if (this.showCustomCategoryDialog) {
         Column() {
-          Text('添加自定义分类')
-            .fontSize(16)
-            .fontWeight(FontWeight.Bold)
-            .fontColor(this.getColorScheme().DIALOG.titleColor)
-            .margin({ bottom: 16 })
+          Column() {
+            Text('添加自定义分类')
+              .fontSize(16)
+              .fontWeight(FontWeight.Bold)
+              .fontColor(this.getColorScheme().DIALOG.titleColor)
+              .margin({ bottom: 16 })
 
-          TextInput({ placeholder: '请输入分类名称', text: this.customCategoryName })
-            .width('100%')
-            .height(44)
-            .backgroundColor(this.getColorScheme().INPUT_SECTION.inputBackground)
-            .borderRadius(8)
-            .onChange((value: string) => {
-              this.customCategoryName = value;
-            })
-            .margin({ bottom: 16 })
-
-          Row() {
-            Button('取消')
-              .width('48%')
-              .height(40)
-              .backgroundColor(this.getColorScheme().BUTTON_SECTION.cancelBackground)
-              .fontColor(this.getColorScheme().BUTTON_SECTION.cancelTextColor)
-              .onClick(() => {
-                this.showCustomCategoryDialog = false;
-                this.customCategoryName = '';
+            TextInput({ placeholder: '请输入分类名称', text: this.customCategoryName })
+              .width('100%')
+              .height(44)
+              .backgroundColor(this.getColorScheme().INPUT_SECTION.inputBackground)
+              .borderRadius(8)
+              .onChange((value: string) => {
+                this.customCategoryName = value;
               })
+              .margin({ bottom: 16 })
 
-            Row().width('4%')
-
-            Button('确定')
-              .width('48%')
-              .height(40)
-              .backgroundColor(this.getColorScheme().BUTTON_SECTION.saveBackground)
-              .fontColor(this.getColorScheme().BUTTON_SECTION.saveTextColor)
-              .onClick(async () => {
-                if (this.customCategoryName) {
-                  // 添加自定义分类到存储
-                  const newCategory: Category = {
-                    name: this.customCategoryName,
-                    icon: '📌',
-                    color: '#B8B5B2'
-                  };
-                  await CategoryUtil.addCustomCategory(newCategory);
-                  
-                  // 重新加载分类列表
-                  await this.updateCategories();
-                  this.selectedCategory = this.customCategoryName;
+            Row() {
+              Button('取消')
+                .width('48%')
+                .height(40)
+                .backgroundColor(this.getColorScheme().BUTTON_SECTION.cancelBackground)
+                .fontColor(this.getColorScheme().BUTTON_SECTION.cancelTextColor)
+                .onClick(() => {
                   this.showCustomCategoryDialog = false;
                   this.customCategoryName = '';
-                  
-                  promptAction.showToast({
-                    message: '自定义分类已添加',
-                    duration: 1500
-                  });
-                }
-              })
+                })
+
+              Row().width('4%')
+
+              Button('确定')
+                .width('48%')
+                .height(40)
+                .backgroundColor(this.getColorScheme().BUTTON_SECTION.saveBackground)
+                .fontColor(this.getColorScheme().BUTTON_SECTION.saveTextColor)
+                .onClick(async () => {
+                  if (this.customCategoryName) {
+                    // 添加自定义分类到存储
+                    const newCategory: Category = {
+                      name: this.customCategoryName,
+                      icon: '📌',
+                      color: '#B8B5B2'
+                    };
+                    await CategoryUtil.addCustomCategory(newCategory);
+                    
+                    // 重新加载分类列表
+                    await this.updateCategories();
+                    this.selectedCategory = this.customCategoryName;
+                    this.showCustomCategoryDialog = false;
+                    this.customCategoryName = '';
+                    
+                    promptAction.showToast({
+                      message: '自定义分类已添加',
+                      duration: 1500
+                    });
+                  }
+                })
+            }
+            .width('100%')
           }
-          .width('100%')
+          .width('80%')
+          .padding(20)
+          .backgroundColor(this.getColorScheme().DIALOG.backgroundColor)
+          .borderRadius(12)
+          .shadow({ radius: 20, color: '#00000040' })
         }
-        .width('80%')
-        .padding(20)
-        .backgroundColor(this.getColorScheme().DIALOG.backgroundColor)
-        .borderRadius(12)
-        .shadow({ radius: 20, color: '#00000040' })
+        .width('100%')
+        .height('100%')
+        .backgroundColor('#00000040')
+        .justifyContent(FlexAlign.Center)
+        .onClick(() => {
+          this.showCustomCategoryDialog = false;
+        })
       }
     }
     .width('100%')

@@ -161,31 +161,32 @@ struct BudgetPage {
   }
 
   build() {
-    Column() {
-      // 导航栏
-      Row() {
-        Button({ type: ButtonType.Circle }) {
-          Text('←').fontSize(20).fontColor(this.getColorScheme().NAVBAR.backButtonColor)
+    Stack() {
+      Column() {
+        // 导航栏
+        Row() {
+          Button({ type: ButtonType.Circle }) {
+            Text('←').fontSize(20).fontColor(this.getColorScheme().NAVBAR.backButtonColor)
+          }
+          .width(36).height(36)
+          .backgroundColor(this.getColorScheme().NAVBAR.backgroundColor)
+          .onClick(() => router.back())
+
+          Text('预算管理')
+            .fontSize(18).fontWeight(FontWeight.Bold)
+            .fontColor(this.getColorScheme().NAVBAR.titleColor)
+            .layoutWeight(1).textAlign(TextAlign.Center)
+
+          Button({ type: ButtonType.Circle }) {
+            Text('+').fontSize(24).fontColor(this.getColorScheme().NAVBAR.titleColor)
+          }
+          .width(36).height(36)
+          .backgroundColor(this.getColorScheme().NAVBAR.buttonBackground)
+          .onClick(() => { this.showAddDialog = true; })
         }
-        .width(36).height(36)
+        .width('100%').padding({ left: 16, right: 16, top: 8, bottom: 8 })
         .backgroundColor(this.getColorScheme().NAVBAR.backgroundColor)
-        .onClick(() => router.back())
-
-        Text('预算管理')
-          .fontSize(18).fontWeight(FontWeight.Bold)
-          .fontColor(this.getColorScheme().NAVBAR.titleColor)
-          .layoutWeight(1).textAlign(TextAlign.Center)
-
-        Button({ type: ButtonType.Circle }) {
-          Text('+').fontSize(24).fontColor(this.getColorScheme().NAVBAR.titleColor)
-        }
-        .width(36).height(36)
-        .backgroundColor(this.getColorScheme().NAVBAR.buttonBackground)
-        .onClick(() => { this.showAddDialog = true; })
-      }
-      .width('100%').padding({ left: 16, right: 16, top: 8, bottom: 8 })
-      .backgroundColor(this.getColorScheme().NAVBAR.backgroundColor)
-      .border({ width: { bottom: 1 }, color: this.getColorScheme().NAVBAR.borderColor })
+        .border({ width: { bottom: 1 }, color: this.getColorScheme().NAVBAR.borderColor })
 
       Scroll() {
         Column() {
@@ -254,6 +255,11 @@ struct BudgetPage {
         .width('100%').padding(16)
       }
       .layoutWeight(1)
+      }
+      .width('100%').height('100%')
+      .backgroundImage(ThemeUtil.getBackgroundImage(ThemeUtil.getTheme()))
+      .backgroundImageSize(ImageSize.Cover)
+      .backgroundImagePosition(Alignment.Center)
 
       // 添加预算对话框
       if (this.showAddDialog) {
@@ -266,9 +272,7 @@ struct BudgetPage {
       }
     }
     .width('100%').height('100%')
-    .backgroundImage(ThemeUtil.getBackgroundImage(ThemeUtil.getTheme()))
-    .backgroundImageSize(ImageSize.Cover)
-    .backgroundImagePosition(Alignment.Center)
+    .alignContent(Alignment.Center)
   }
 
   @Builder
@@ -473,6 +477,7 @@ struct BudgetPage {
         TextInput({ placeholder: '请输入预算金额', text: this.newAmount })
           .type(InputType.Number).width('100%').height(44)
           .backgroundColor(this.getColorScheme().LIST_ITEM.backgroundColor)
+          .placeholderColor('#999999')
           .onChange((value: string) => { this.newAmount = value; })
           .margin({ bottom: 16 })
 
