@@ -219,6 +219,7 @@ struct AccountBooksPage {
       }
       .scrollable(ScrollDirection.Vertical)
       .edgeEffect(EdgeEffect.Spring)
+      .align(Alignment.Top)
       .layoutWeight(1)
 
       // 创建账本对话框

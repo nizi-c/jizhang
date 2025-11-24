@@ -4,6 +4,7 @@
     "pages/AddRecordPage",
     "pages/RecordsPage",
     "pages/ChartPageEntry",
-    "pages/AccountBooksPage"
+    "pages/AccountBooksPage",
+    "pages/BudgetPage"
   ]
 }

@@ -180,6 +180,28 @@ struct Index {
 
       Button() {
         Row() {
+          Image($r('app.media.yusuan'))
+            .width(20)
+            .height(20)
+            .margin({ right: 8 })
+          Text('预算管理')
+            .fontColor(this.colors.textPrimary)
+        }
+      }
+      .width('100%')
+      .height(44)
+      .backgroundColor(this.colors.cardBg)
+      .onClick(() => {
+        this.menuDialogController?.close();
+        router.pushUrl({ url: 'pages/BudgetPage' });
+      })
+
+      Divider()
+        .strokeWidth(1)
+        .color(this.colors.border)
+
+      Button() {
+        Row() {
           Image(this.currentTheme === 'light' ? $r('app.media.moon') : $r('app.media.sun'))
             .width(24)
             .height(24)

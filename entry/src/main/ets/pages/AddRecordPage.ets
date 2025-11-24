@@ -4,8 +4,11 @@ import { DateUtil } from '../utils/DateUtil';
 import { COLORS, DynamicColors, EXPENSE_CATEGORIES, INCOME_CATEGORIES, Category } from '../constants/Constants';
 import { LIGHT_COLOR_SCHEME, DARK_COLOR_SCHEME } from '../constants/ColorSchemes';
 import { ThemeUtil } from '../utils/ThemeUtil';
+import { BudgetUtil } from '../utils/BudgetUtil';
+import { Budget } from '../models/Budget';
 import router from '@ohos.router';
 import promptAction from '@ohos.promptAction';
+import common from '@ohos.app.ability.common';
 
 @Entry
 @Component
@@ -20,8 +23,10 @@ struct AddRecordPage {
   @State customCategoryName: string = '';
   @State showCustomCategoryDialog: boolean = false;
 
-  aboutToAppear() {
-    StorageUtil.setContext(getContext(this));
+  async aboutToAppear() {
+    const context = getContext(this) as common.UIAbilityContext;
+    StorageUtil.setContext(context);
+    await BudgetUtil.init(context);
     this.updateCategories();
   }
 
@@ -59,6 +64,11 @@ struct AddRecordPage {
       records.unshift(record);
       await StorageUtil.saveRecords(records);
 
+      // 如果是支出，检查预算状态
+      if (this.recordType === 'expense') {
+        await this.checkBudgetWarning(record);
+      }
+
       promptAction.showToast({
         message: '保存成功',
         duration: 1500
@@ -74,6 +84,52 @@ struct AddRecordPage {
         message: '保存失败，请重试',
         duration: 2000
       });
+    }
+  }
+
+  async checkBudgetWarning(record: AccountRecord) {
+    try {
+      const budgets = await BudgetUtil.getAllBudgets();
+      const categoryBudget = budgets.find(b => b.category === record.category);
+      
+      if (!categoryBudget) {
+        return;
+      }
+
+      // 计算该分类的总支出
+      const records = await StorageUtil.getRecords();
+      const totalUsed = records
+        .filter(r => r.category === record.category && r.type === 'expense')
+        .reduce((sum, r) => sum + r.amount, 0);
+
+      const percentage = (totalUsed / categoryBudget.amount) * 100;
+
+      // 超支预警
+      if (percentage > 100) {
+        const exceeded = totalUsed - categoryBudget.amount;
+        AlertDialog.show({
+          title: '🕐 预算超支提醒',
+          message: `【${record.category}】预算已超支！\n\n预算金额：¥${categoryBudget.amount.toFixed(2)}\n已使用：¥${totalUsed.toFixed(2)}\n超支：¥${exceeded.toFixed(2)}`,
+          confirm: {
+            value: '知道了',
+            action: () => {}
+          }
+        });
+      }
+      // 即将超支预警（达到90%）
+      else if (percentage >= categoryBudget.warningThreshold) {
+        const remaining = categoryBudget.amount - totalUsed;
+        AlertDialog.show({
+          title: '🕐 预算预警',
+          message: `【${record.category}】预算即将超支！\n\n预算金额：¥${categoryBudget.amount.toFixed(2)}\n已使用：¥${totalUsed.toFixed(2)}（${percentage.toFixed(1)}%）\n剩余：¥${remaining.toFixed(2)}`,
+          confirm: {
+            value: '知道了',
+            action: () => {}
+          }
+        });
+      }
+    } catch (error) {
+      console.error('检查预算失败:', error);
     }
   }
 
