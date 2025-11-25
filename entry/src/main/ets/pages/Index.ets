@@ -7,6 +7,8 @@ import { LIGHT_COLOR_SCHEME, DARK_COLOR_SCHEME } from '../constants/ColorSchemes
 import { ThemeUtil, ThemeType, ThemeColors } from '../utils/ThemeUtil';
 import { MockData } from '../utils/MockData';
 import { AccountBookUtil } from '../utils/AccountBookUtil';
+import { ResponsiveUtil, DeviceType } from '../utils/ResponsiveUtil';
+import { ResponsiveConstants } from '../constants/ResponsiveConstants';
 import router from '@ohos.router';
 import { QueryPage } from './QueryPage';
 import { ChartPage } from './ChartPage';
@@ -25,6 +27,8 @@ struct Index {
   @State currentTheme: ThemeType = 'light';
   @State colors: ThemeColors = ThemeUtil.LIGHT_THEME;
   @State currentBookName: string = '默认账本';
+  @State deviceType: DeviceType = ResponsiveUtil.getDeviceType();
+  @State screenWidth: number = ResponsiveUtil.getScreenWidth();
   menuDialogController: CustomDialogController | undefined = undefined;
 
   async aboutToAppear() {
@@ -73,6 +77,11 @@ struct Index {
     return this.currentTheme === 'light' ? LIGHT_COLOR_SCHEME : DARK_COLOR_SCHEME;
   }
 
+  updateDeviceInfo() {
+    this.deviceType = ResponsiveUtil.getDeviceType();
+    this.screenWidth = ResponsiveUtil.getScreenWidth();
+  }
+
   openMenuDialog() {
     let self = this;
     this.menuDialogController = new CustomDialogController({
@@ -92,16 +101,17 @@ struct Index {
       Button() {
         Row() {
           Image($r('app.media.zhangben'))
-            .width(24)
-            .height(24)
-            .margin({ right: 8 })
+            .width(ResponsiveConstants.getFontSize('body'))
+            .height(ResponsiveConstants.getFontSize('body'))
+            .margin({ right: ResponsiveConstants.getSpacing('small') })
           Text('账本管理')
+            .fontSize(ResponsiveConstants.getFontSize('body'))
             .fontColor(this.colors.primary)
             .fontWeight(FontWeight.Bold)
         }
       }
       .width('100%')
-      .height(44)
+      .height(ResponsiveConstants.getButtonHeight('medium'))
       .backgroundColor(this.colors.cardBg)
       .onClick(() => {
         this.menuDialogController?.close();
@@ -115,15 +125,16 @@ struct Index {
       Button() {
         Row() {
           Image($r('app.media.tianjia'))
-            .width(24)
-            .height(24)
-            .margin({ right: 8 })
+            .width(ResponsiveConstants.getFontSize('body'))
+            .height(ResponsiveConstants.getFontSize('body'))
+            .margin({ right: ResponsiveConstants.getSpacing('small') })
           Text('添加账单')
+            .fontSize(ResponsiveConstants.getFontSize('body'))
             .fontColor(this.colors.textPrimary)
         }
       }
       .width('100%')
-      .height(44)
+      .height(ResponsiveConstants.getButtonHeight('medium'))
       .backgroundColor(this.colors.cardBg)
       .onClick(() => {
         this.menuDialogController?.close();
@@ -137,15 +148,16 @@ struct Index {
       Button() {
         Row() {
           Image($r('app.media.liushui'))
-            .width(24)
-            .height(24)
-            .margin({ right: 8 })
+            .width(ResponsiveConstants.getFontSize('body'))
+            .height(ResponsiveConstants.getFontSize('body'))
+            .margin({ right: ResponsiveConstants.getSpacing('small') })
           Text('流水')
+            .fontSize(ResponsiveConstants.getFontSize('body'))
             .fontColor(this.colors.textPrimary)
         }
       }
       .width('100%')
-      .height(44)
+      .height(ResponsiveConstants.getButtonHeight('medium'))
       .backgroundColor(this.colors.cardBg)
       .onClick(() => {
         this.menuDialogController?.close();
@@ -159,15 +171,16 @@ struct Index {
       Button() {
         Row() {
           Image($r('app.media.tongji'))
-            .width(24)
-            .height(24)
-            .margin({ right: 8 })
+            .width(ResponsiveConstants.getFontSize('body'))
+            .height(ResponsiveConstants.getFontSize('body'))
+            .margin({ right: ResponsiveConstants.getSpacing('small') })
           Text('统计')
+            .fontSize(ResponsiveConstants.getFontSize('body'))
             .fontColor(this.colors.textPrimary)
         }
       }
       .width('100%')
-      .height(44)
+      .height(ResponsiveConstants.getButtonHeight('medium'))
       .backgroundColor(this.colors.cardBg)
       .onClick(() => {
         this.menuDialogController?.close();
@@ -181,15 +194,16 @@ struct Index {
       Button() {
         Row() {
           Image($r('app.media.yusuan'))
-            .width(20)
-            .height(20)
-            .margin({ right: 8 })
+            .width(ResponsiveConstants.getFontSize('body'))
+            .height(ResponsiveConstants.getFontSize('body'))
+            .margin({ right: ResponsiveConstants.getSpacing('small') })
           Text('预算管理')
+            .fontSize(ResponsiveConstants.getFontSize('body'))
             .fontColor(this.colors.textPrimary)
         }
       }
       .width('100%')
-      .height(44)
+      .height(ResponsiveConstants.getButtonHeight('medium'))
       .backgroundColor(this.colors.cardBg)
       .onClick(() => {
         this.menuDialogController?.close();
@@ -203,15 +217,16 @@ struct Index {
       Button() {
         Row() {
           Image(this.currentTheme === 'light' ? $r('app.media.moon') : $r('app.media.sun'))
-            .width(24)
-            .height(24)
-            .margin({ right: 8 })
+            .width(ResponsiveConstants.getFontSize('body'))
+            .height(ResponsiveConstants.getFontSize('body'))
+            .margin({ right: ResponsiveConstants.getSpacing('small') })
           Text(this.currentTheme === 'light' ? '深色模式' : '浅色模式')
+            .fontSize(ResponsiveConstants.getFontSize('body'))
             .fontColor(this.colors.textPrimary)
         }
       }
       .width('100%')
-      .height(44)
+      .height(ResponsiveConstants.getButtonHeight('medium'))
       .backgroundColor(this.colors.cardBg)
       .onClick(() => {
         this.currentTheme = ThemeUtil.toggleTheme();
@@ -226,14 +241,15 @@ struct Index {
       Button() {
         Row() {
           Text('📊')
-            .fontSize(20)
-            .margin({ right: 8 })
+            .fontSize(ResponsiveConstants.getFontSize('body'))
+            .margin({ right: ResponsiveConstants.getSpacing('small') })
           Text('生成测试数据')
+            .fontSize(ResponsiveConstants.getFontSize('body'))
             .fontColor(this.colors.textPrimary)
         }
       }
       .width('100%')
-      .height(44)
+      .height(ResponsiveConstants.getButtonHeight('medium'))
       .backgroundColor(this.colors.cardBg)
       .onClick(async () => {
         this.menuDialogController?.close();
@@ -252,9 +268,9 @@ struct Index {
         }
       })
     }
-    .width('70%')
+    .width(ResponsiveUtil.isPhone() ? '85%' : '70%')
     .backgroundColor(this.colors.cardBg)
-    .borderRadius(8)
+    .borderRadius(ResponsiveConstants.getBorderRadius('large'))
   }
 
   build() {
@@ -263,11 +279,11 @@ struct Index {
       Row() {
         Column() {
           Text('记账本')
-            .fontSize(24)
+            .fontSize(ResponsiveConstants.getFontSize('title'))
             .fontWeight(FontWeight.Bold)
             .fontColor(this.getColorScheme().NAVBAR.titleColor)
           Text(this.currentBookName)
-            .fontSize(12)
+            .fontSize(ResponsiveConstants.getFontSize('caption'))
             .fontColor(this.getColorScheme().LIST_ITEM.descriptionColor)
             .margin({ top: 2 })
         }
@@ -277,18 +293,23 @@ struct Index {
           .layoutWeight(1)
         Button({ type: ButtonType.Circle, stateEffect: true }) {
           Text('⋮')
-            .fontSize(24)
+            .fontSize(ResponsiveConstants.getFontSize('title'))
             .fontColor(this.getColorScheme().NAVBAR.titleColor)
         }
-        .width(44)
-        .height(44)
+        .width(ResponsiveConstants.getButtonHeight('medium'))
+        .height(ResponsiveConstants.getButtonHeight('medium'))
         .backgroundColor(this.getColorScheme().NAVBAR.backgroundColor)
         .onClick(() => {
           this.openMenuDialog();
         })
       }
       .width('100%')
-      .padding({ left: 16, right: 16, top: 8, bottom: 8 })
+      .padding({
+        left: ResponsiveConstants.getPadding('medium'),
+        right: ResponsiveConstants.getPadding('medium'),
+        top: 8,
+        bottom: 8
+      })
       .backgroundColor(this.getColorScheme().NAVBAR.backgroundColor)
       .border({ width: { bottom: 1 }, color: this.getColorScheme().NAVBAR.borderColor })
 
@@ -306,150 +327,185 @@ struct Index {
 
   @Builder
   buildHomeTab() {
+    // 根据设备类型选择不同的布局
+    if (ResponsiveUtil.isPhone()) {
+      this.buildPhoneLayout();
+    } else if (ResponsiveUtil.isTablet()) {
+      this.buildTabletLayout();
+    } else {
+      this.buildLargeLayout();
+    }
+  }
+
+  @Builder
+  buildPhoneLayout() {
+    // 手机布局：单列
     Column() {
       // 今日统计卡片
-      Column() {
-        Text('今日收支')
-          .fontSize(14)
-          .fontColor(this.getColorScheme().STAT_CARD.titleColor)
-          .margin({ bottom: 12 })
-
-        Row() {
-          Column() {
-            Text('收入')
-              .fontSize(12)
-              .fontColor(this.getColorScheme().STAT_CARD.labelColor)
-              .margin({ bottom: 4 })
-            Text(`¥${this.todayIncome.toFixed(2)}`)
-              .fontSize(20)
-              .fontWeight(FontWeight.Bold)
-              .fontColor(this.getColorScheme().STAT_CARD.incomeColor)
-          }
-          .layoutWeight(1)
-
-          Column() {
-            Text('支出')
-              .fontSize(12)
-              .fontColor(this.getColorScheme().STAT_CARD.labelColor)
-              .margin({ bottom: 4 })
-            Text(`¥${this.todayExpense.toFixed(2)}`)
-              .fontSize(20)
-              .fontWeight(FontWeight.Bold)
-              .fontColor(this.getColorScheme().STAT_CARD.expenseColor)
-          }
-          .layoutWeight(1)
-
-          Column() {
-            Text('结余')
-              .fontSize(12)
-              .fontColor(this.getColorScheme().STAT_CARD.labelColor)
-              .margin({ bottom: 4 })
-            Text(`¥${(this.todayIncome - this.todayExpense).toFixed(2)}`)
-              .fontSize(20)
-              .fontWeight(FontWeight.Bold)
-              .fontColor(this.todayIncome - this.todayExpense >= 0 ? this.getColorScheme().STAT_CARD.incomeColor : this.getColorScheme().STAT_CARD.expenseColor)
-          }
-          .layoutWeight(1)
-        }
-        .width('100%')
-      }
-      .width('100%')
-      .padding(16)
-      .backgroundColor(this.getColorScheme().STAT_CARD.backgroundColor)
-      .borderRadius(12)
-      .margin({ left: 16, right: 16, top: 16, bottom: 12 })
-      .shadow({ radius: 8, color: this.getColorScheme().STAT_CARD.shadowColor })
-
+      this.buildStatCard('今日收支', this.todayIncome, this.todayExpense);
+      
       // 本月统计卡片
-      Column() {
-        Text('本月收支')
-          .fontSize(14)
-          .fontColor(this.getColorScheme().STAT_CARD.titleColor)
-          .margin({ bottom: 12 })
-
-        Row() {
-          Column() {
-            Text('收入')
-              .fontSize(12)
-              .fontColor(this.getColorScheme().STAT_CARD.labelColor)
-              .margin({ bottom: 4 })
-            Text(`¥${this.monthIncome.toFixed(2)}`)
-              .fontSize(20)
-              .fontWeight(FontWeight.Bold)
-              .fontColor(this.getColorScheme().STAT_CARD.incomeColor)
-          }
-          .layoutWeight(1)
-
-          Column() {
-            Text('支出')
-              .fontSize(12)
-              .fontColor(this.getColorScheme().STAT_CARD.labelColor)
-              .margin({ bottom: 4 })
-            Text(`¥${this.monthExpense.toFixed(2)}`)
-              .fontSize(20)
-              .fontWeight(FontWeight.Bold)
-              .fontColor(this.getColorScheme().STAT_CARD.expenseColor)
-          }
-          .layoutWeight(1)
-
-          Column() {
-            Text('结余')
-              .fontSize(12)
-              .fontColor(this.getColorScheme().STAT_CARD.labelColor)
-              .margin({ bottom: 4 })
-            Text(`¥${(this.monthIncome - this.monthExpense).toFixed(2)}`)
-              .fontSize(20)
-              .fontWeight(FontWeight.Bold)
-              .fontColor(this.monthIncome - this.monthExpense >= 0 ? this.getColorScheme().STAT_CARD.incomeColor : this.getColorScheme().STAT_CARD.expenseColor)
-          }
-          .layoutWeight(1)
-        }
-        .width('100%')
-      }
-      .width('100%')
-      .padding(16)
-      .backgroundColor(this.getColorScheme().STAT_CARD.backgroundColor)
-      .borderRadius(12)
-      .margin({ left: 16, right: 16, bottom: 12 })
-      .shadow({ radius: 8, color: this.getColorScheme().STAT_CARD.shadowColor })
-
+      this.buildStatCard('本月收支', this.monthIncome, this.monthExpense);
+      
       // 最近记录
-      Column() {
-        Text('最近记录')
-          .fontSize(14)
-          .fontColor(this.getColorScheme().RECENT_LIST.categoryColor)
-          .margin({ bottom: 12 })
-
-        if (this.records.length === 0) {
-          Text('暂无记录')
-            .fontSize(14)
-            .fontColor(this.getColorScheme().RECENT_LIST.descriptionColor)
-            .width('100%')
-            .textAlign(TextAlign.Center)
-            .padding(20)
-        } else {
-          List() {
-            ForEach(this.records.slice(0, 5), (record: AccountRecord) => {
-              ListItem() {
-                this.buildRecordItem(record)
-              }
-            }, (record: AccountRecord) => record.id)
-          }
-          .width('100%')
-          .listDirection(Axis.Vertical)
-          .divider({ strokeWidth: 1, color: this.getColorScheme().RECENT_LIST.dividerColor })
-        }
-      }
-      .width('100%')
-      .padding(16)
-      .backgroundColor(this.getColorScheme().RECENT_LIST.backgroundColor)
-      .borderRadius(12)
-      .margin({ left: 16, right: 16 })
-      .shadow({ radius: 8, color: this.getColorScheme().STAT_CARD.shadowColor })
+      this.buildRecentRecords();
     }
     .width('100%')
-    .height('100%')
-    .padding({ bottom: 16 })
+    .padding({ bottom: ResponsiveConstants.getSpacing('large') })
+  }
+
+  @Builder
+  buildTabletLayout() {
+    // 平板布局：两列
+    Column() {
+      Row() {
+        Column() {
+          this.buildStatCard('今日收支', this.todayIncome, this.todayExpense);
+        }
+        .layoutWeight(1)
+        .margin({ right: ResponsiveConstants.getSpacing('medium') })
+
+        Column() {
+          this.buildStatCard('本月收支', this.monthIncome, this.monthExpense);
+        }
+        .layoutWeight(1)
+      }
+      .width('100%')
+      .margin({ bottom: ResponsiveConstants.getSpacing('large') })
+
+      // 最近记录
+      this.buildRecentRecords();
+    }
+    .width('100%')
+    .padding({ bottom: ResponsiveConstants.getSpacing('large') })
+  }
+
+  @Builder
+  buildLargeLayout() {
+    // 大屏布局：三列或自适应
+    Column() {
+      Row() {
+        Column() {
+          this.buildStatCard('今日收支', this.todayIncome, this.todayExpense);
+        }
+        .layoutWeight(1)
+        .margin({ right: ResponsiveConstants.getSpacing('large') })
+
+        Column() {
+          this.buildStatCard('本月收支', this.monthIncome, this.monthExpense);
+        }
+        .layoutWeight(1)
+        .margin({ right: ResponsiveConstants.getSpacing('large') })
+
+        Column() {
+          this.buildRecentRecords();
+        }
+        .layoutWeight(1)
+      }
+      .width('100%')
+    }
+    .width('100%')
+    .padding({ bottom: ResponsiveConstants.getSpacing('large') })
+  }
+
+  @Builder
+  buildStatCard(title: string, income: number, expense: number) {
+    Column() {
+      Text(title)
+        .fontSize(ResponsiveConstants.getFontSize('subtitle'))
+        .fontColor(this.getColorScheme().STAT_CARD.titleColor)
+        .margin({ bottom: ResponsiveConstants.getSpacing('medium') })
+
+      Row() {
+        Column() {
+          Text('收入')
+            .fontSize(ResponsiveConstants.getFontSize('caption'))
+            .fontColor(this.getColorScheme().STAT_CARD.labelColor)
+            .margin({ bottom: 4 })
+          Text(`¥${income.toFixed(2)}`)
+            .fontSize(ResponsiveConstants.getFontSize('body'))
+            .fontWeight(FontWeight.Bold)
+            .fontColor(this.getColorScheme().STAT_CARD.incomeColor)
+        }
+        .layoutWeight(1)
+
+        Column() {
+          Text('支出')
+            .fontSize(ResponsiveConstants.getFontSize('caption'))
+            .fontColor(this.getColorScheme().STAT_CARD.labelColor)
+            .margin({ bottom: 4 })
+          Text(`¥${expense.toFixed(2)}`)
+            .fontSize(ResponsiveConstants.getFontSize('body'))
+            .fontWeight(FontWeight.Bold)
+            .fontColor(this.getColorScheme().STAT_CARD.expenseColor)
+        }
+        .layoutWeight(1)
+
+        Column() {
+          Text('结余')
+            .fontSize(ResponsiveConstants.getFontSize('caption'))
+            .fontColor(this.getColorScheme().STAT_CARD.labelColor)
+            .margin({ bottom: 4 })
+          Text(`¥${(income - expense).toFixed(2)}`)
+            .fontSize(ResponsiveConstants.getFontSize('body'))
+            .fontWeight(FontWeight.Bold)
+            .fontColor(income >= expense ? 
+              this.getColorScheme().STAT_CARD.incomeColor : 
+              this.getColorScheme().STAT_CARD.expenseColor)
+        }
+        .layoutWeight(1)
+      }
+      .width('100%')
+    }
+    .width('100%')
+    .padding(ResponsiveConstants.getPadding('medium'))
+    .backgroundColor(this.getColorScheme().STAT_CARD.backgroundColor)
+    .borderRadius(ResponsiveConstants.getBorderRadius('large'))
+    .margin({
+      left: ResponsiveConstants.getPadding('medium'),
+      right: ResponsiveConstants.getPadding('medium'),
+      bottom: ResponsiveConstants.getSpacing('medium')
+    })
+    .shadow(ResponsiveConstants.getShadow('medium'))
+  }
+
+  @Builder
+  buildRecentRecords() {
+    Column() {
+      Text('最近记录')
+        .fontSize(ResponsiveConstants.getFontSize('subtitle'))
+        .fontColor(this.getColorScheme().RECENT_LIST.categoryColor)
+        .margin({ bottom: ResponsiveConstants.getSpacing('medium') })
+
+      if (this.records.length === 0) {
+        Text('暂无记录')
+          .fontSize(ResponsiveConstants.getFontSize('body'))
+          .fontColor(this.getColorScheme().RECENT_LIST.descriptionColor)
+          .width('100%')
+          .textAlign(TextAlign.Center)
+          .padding(ResponsiveConstants.getPadding('large'))
+      } else {
+        List() {
+          ForEach(this.records.slice(0, 5), (record: AccountRecord) => {
+            ListItem() {
+              this.buildRecordItem(record)
+            }
+          }, (record: AccountRecord) => record.id)
+        }
+        .width('100%')
+        .listDirection(Axis.Vertical)
+        .divider({ strokeWidth: 1, color: this.getColorScheme().RECENT_LIST.dividerColor })
+      }
+    }
+    .width('100%')
+    .padding(ResponsiveConstants.getPadding('medium'))
+    .backgroundColor(this.getColorScheme().RECENT_LIST.backgroundColor)
+    .borderRadius(ResponsiveConstants.getBorderRadius('large'))
+    .margin({
+      left: ResponsiveConstants.getPadding('medium'),
+      right: ResponsiveConstants.getPadding('medium')
+    })
+    .shadow(ResponsiveConstants.getShadow('medium'))
   }
 
 
@@ -459,11 +515,11 @@ struct Index {
     Row() {
       Column() {
         Text(record.category)
-          .fontSize(14)
+          .fontSize(ResponsiveConstants.getFontSize('body'))
           .fontWeight(FontWeight.Bold)
           .fontColor(this.getColorScheme().RECENT_LIST.categoryColor)
         Text(record.description)
-          .fontSize(12)
+          .fontSize(ResponsiveConstants.getFontSize('caption'))
           .fontColor(this.getColorScheme().RECENT_LIST.descriptionColor)
           .margin({ top: 4 })
       }
@@ -472,18 +528,18 @@ struct Index {
 
       Column() {
         Text(`${record.type === 'income' ? '+' : '-'}¥${record.amount.toFixed(2)}`)
-          .fontSize(14)
+          .fontSize(ResponsiveConstants.getFontSize('body'))
           .fontWeight(FontWeight.Bold)
           .fontColor(record.type === 'income' ? this.getColorScheme().RECENT_LIST.incomeAmountColor : this.getColorScheme().RECENT_LIST.expenseAmountColor)
         Text(record.dateStr)
-          .fontSize(12)
+          .fontSize(ResponsiveConstants.getFontSize('caption'))
           .fontColor(this.getColorScheme().RECENT_LIST.dateColor)
           .margin({ top: 4 })
       }
       .alignItems(HorizontalAlign.End)
     }
     .width('100%')
-    .padding(12)
+    .padding(ResponsiveConstants.getSpacing('medium'))
     .backgroundColor(this.getColorScheme().RECENT_LIST.itemBackground)
   }
 
