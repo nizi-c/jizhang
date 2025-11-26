@@ -43,8 +43,11 @@ export class AccountViewModel {
     let income = 0;
     let expense = 0;
 
+    console.log('ViewModel: getTodaySummary - 今天:', today, '记录数:', this.records.length);
+
     this.records.forEach(record => {
       if (record.dateStr === today) {
+        console.log('ViewModel: 匹配今日记录 -', record.type, record.amount);
         if (record.type === 'income') {
           income += record.amount;
         } else {
@@ -53,6 +56,7 @@ export class AccountViewModel {
       }
     });
 
+    console.log('ViewModel: 今日统计 - 收入:', income, '支出:', expense);
     return { income, expense };
   }
 
@@ -61,6 +65,8 @@ export class AccountViewModel {
     const thisMonth = DateUtil.getThisMonthStr();
     let income = 0;
     let expense = 0;
+
+    console.log('ViewModel: getMonthSummary - 本月:', thisMonth, '记录数:', this.records.length);
 
     this.records.forEach(record => {
       if (record.dateStr.startsWith(thisMonth)) {
@@ -72,6 +78,7 @@ export class AccountViewModel {
       }
     });
 
+    console.log('ViewModel: 本月统计 - 收入:', income, '支出:', expense);
     return { income, expense };
   }
 

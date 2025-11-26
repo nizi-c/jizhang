@@ -3,6 +3,7 @@ import { AccountBook } from '../models/AccountBook';
 import { AccountBookUtil } from '../utils/AccountBookUtil';
 import { ThemeUtil } from '../utils/ThemeUtil';
 import { LIGHT_COLOR_SCHEME, DARK_COLOR_SCHEME } from '../constants/ColorSchemes';
+import { EventBus, Events } from '../utils/EventBus';
 import router from '@ohos.router';
 import promptAction from '@ohos.promptAction';
 import common from '@ohos.app.ability.common';
@@ -22,13 +23,16 @@ struct AccountBooksPage {
   private bookIcons: string[] = ['📒', '💰', '💳', '🏦', '📊', '💵', '🎯', '📝', '🔖', '📌'];
   private scroller: Scroller = new Scroller();
 
-  async aboutToAppear() {
+  aboutToAppear() {
     // 确保AccountBookUtil已初始化
     const context = getContext(this) as common.UIAbilityContext;
     if (!AccountBookUtil.getCurrentBookId()) {
-      await AccountBookUtil.init(context);
+      AccountBookUtil.init(context).then(() => {
+        this.loadBooks();
+      });
+    } else {
+      this.loadBooks();
     }
-    await this.loadBooks();
     
     // 滚动到顶部
     setTimeout(() => {
@@ -36,29 +40,42 @@ struct AccountBooksPage {
     }, 200);
   }
 
-  async loadBooks() {
-    this.books = await AccountBookUtil.getAllBooks();
-    this.currentBookId = AccountBookUtil.getCurrentBookId();
+  loadBooks() {
+    AccountBookUtil.getAllBooks().then((books: AccountBook[]) => {
+      this.books = [...books];
+      this.currentBookId = AccountBookUtil.getCurrentBookId();
+      console.log('AccountBooksPage: 账本列表已加载，总数:', this.books.length);
+    }).catch((error: Error) => {
+      console.error('AccountBooksPage: 加载账本失败:', error);
+    });
   }
 
   getColorScheme() {
     return ThemeUtil.getTheme() === 'light' ? LIGHT_COLOR_SCHEME : DARK_COLOR_SCHEME;
   }
 
-  async switchBook(bookId: string) {
-    await AccountBookUtil.setCurrentBook(bookId);
-    this.currentBookId = bookId;
-    
-    promptAction.showToast({
-      message: '已切换账本',
-      duration: 1500
+  switchBook(bookId: string) {
+    AccountBookUtil.setCurrentBook(bookId).then(() => {
+      this.currentBookId = bookId;
+      console.log('AccountBooksPage: 已切换账本:', bookId);
+      
+      // 发送账本切换事件
+      EventBus.emit(Events.BOOK_SWITCHED, bookId);
+      
+      promptAction.showToast({
+        message: '已切换账本',
+        duration: 1500
+      });
+      
+      // 延迟返回首页刷新数据
+      setTimeout(() => {
+        console.log('AccountBooksPage: 返回首页');
+        router.back();
+      }, 1200);
     });
-    
-    // 返回首页刷新数据
-    router.back();
   }
 
-  async createBook() {
+  createBook() {
     if (!this.newBookName.trim()) {
       promptAction.showToast({
         message: '请输入账本名称',
@@ -67,9 +84,8 @@ struct AccountBooksPage {
       return;
     }
 
-    try {
-      await AccountBookUtil.createBook(this.newBookName.trim(), this.newBookIcon);
-      await this.loadBooks();
+    AccountBookUtil.createBook(this.newBookName.trim(), this.newBookIcon).then(() => {
+      this.loadBooks();
       
       this.showCreateDialog = false;
       this.newBookName = '';
@@ -79,15 +95,16 @@ struct AccountBooksPage {
         message: '创建成功',
         duration: 1500
       });
-    } catch (error) {
+    }).catch((error: Error) => {
+      console.error('AccountBooksPage: 创建账本失败:', error);
       promptAction.showToast({
         message: '创建失败',
         duration: 2000
       });
-    }
+    });
   }
 
-  async deleteBook(book: AccountBook) {
+  deleteBook(book: AccountBook) {
     if (book.isDefault) {
       promptAction.showToast({
         message: '不能删除默认账本',
@@ -104,19 +121,20 @@ struct AccountBooksPage {
       return;
     }
 
-    const success = await AccountBookUtil.deleteBook(book.id);
-    if (success) {
-      await this.loadBooks();
-      promptAction.showToast({
-        message: '删除成功',
-        duration: 1500
-      });
-    } else {
-      promptAction.showToast({
-        message: '删除失败',
-        duration: 2000
-      });
-    }
+    AccountBookUtil.deleteBook(book.id).then((success: boolean) => {
+      if (success) {
+        this.loadBooks();
+        promptAction.showToast({
+          message: '删除成功',
+          duration: 1500
+        });
+      } else {
+        promptAction.showToast({
+          message: '删除失败',
+          duration: 2000
+        });
+      }
+    });
   }
 
   showRenameBookDialog(book: AccountBook) {
@@ -125,7 +143,7 @@ struct AccountBooksPage {
     this.showRenameDialog = true;
   }
 
-  async renameBookConfirm() {
+  renameBookConfirm() {
     if (!this.renameBook) return;
 
     if (!this.renameBookName.trim()) {
@@ -136,25 +154,38 @@ struct AccountBooksPage {
       return;
     }
 
-    try {
-      this.renameBook.name = this.renameBookName.trim();
-      await AccountBookUtil.saveBook(this.renameBook);
-      await this.loadBooks();
-
-      this.showRenameDialog = false;
-      this.renameBook = null;
-      this.renameBookName = '';
+    this.renameBook.name = this.renameBookName.trim();
+    AccountBookUtil.saveBook(this.renameBook).then(() => {
+      this.loadBooks();
+      console.log('AccountBooksPage: 账本已重命名为:', this.renameBook?.name);
 
       promptAction.showToast({
         message: '重命名成功',
         duration: 1500
       });
-    } catch (error) {
+
+      // 发送账本更新事件
+      console.log('AccountBooksPage: 发送 BOOK_UPDATED 事件');
+      if (this.renameBook) {
+        EventBus.emit(Events.BOOK_UPDATED, this.renameBook);
+      }
+
+      this.showRenameDialog = false;
+      this.renameBook = null;
+      this.renameBookName = '';
+
+      // 延迟返回，确保事件已被处理
+      setTimeout(() => {
+        console.log('AccountBooksPage: 返回首页');
+        router.back();
+      }, 1200);
+    }).catch((error: Error) => {
+      console.error('AccountBooksPage: 重命名失败:', error);
       promptAction.showToast({
         message: '重命名失败',
         duration: 2000
       });
-    }
+    });
   }
 
   build() {

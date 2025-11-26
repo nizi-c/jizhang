@@ -9,6 +9,7 @@ import { Budget } from '../models/Budget';
 import { CategoryUtil } from '../utils/CategoryUtil';
 import { ResponsiveUtil } from '../utils/ResponsiveUtil';
 import { ResponsiveConstants } from '../constants/ResponsiveConstants';
+import { EventBus, Events } from '../utils/EventBus';
 import router from '@ohos.router';
 import promptAction from '@ohos.promptAction';
 import common from '@ohos.app.ability.common';
@@ -26,24 +27,39 @@ struct AddRecordPage {
   @State customCategoryName: string = '';
   @State showCustomCategoryDialog: boolean = false;
 
-  async aboutToAppear() {
+  aboutToAppear() {
     const context = getContext(this) as common.UIAbilityContext;
+    console.log('AddRecordPage: aboutToAppear 被调用');
+    
     StorageUtil.setContext(context);
-    await BudgetUtil.init(context);
-    await this.updateCategories();
+    console.log('AddRecordPage: StorageUtil Context 已设置');
+    
+    BudgetUtil.init(context).then(() => {
+      console.log('AddRecordPage: BudgetUtil 已初始化');
+      this.updateCategories();
+    }).catch((error: Error) => {
+      console.error('AddRecordPage: BudgetUtil 初始化失败:', error);
+      this.updateCategories();
+    });
   }
 
-  async updateCategories() {
+  updateCategories() {
     const baseCategories = this.recordType === 'income' ? INCOME_CATEGORIES : EXPENSE_CATEGORIES;
-    const customCategories = await CategoryUtil.getCustomCategories();
     
-    // 合并基础分类和自定义分类（只显示支出类型的自定义分类）
-    const expenseCustom = customCategories.filter(c => this.recordType === 'expense');
-    this.categories = [...baseCategories, ...expenseCustom];
-    
-    if (!this.selectedCategory || !this.categories.find(c => c.name === this.selectedCategory)) {
+    CategoryUtil.getCustomCategories().then((customCategories: Category[]) => {
+      // 合并基础分类和自定义分类（只显示支出类型的自定义分类）
+      const expenseCustom = customCategories.filter(c => this.recordType === 'expense');
+      this.categories = [...baseCategories, ...expenseCustom];
+      
+      if (!this.selectedCategory || !this.categories.find(c => c.name === this.selectedCategory)) {
+        this.selectedCategory = this.categories[0]?.name || '';
+      }
+      console.log('AddRecordPage: 分类已加载，总数:', this.categories.length);
+    }).catch((error: Error) => {
+      console.error('AddRecordPage: 加载分类失败:', error);
+      this.categories = baseCategories;
       this.selectedCategory = this.categories[0]?.name || '';
-    }
+    });
   }
 
   getColorScheme() {
@@ -74,6 +90,7 @@ struct AddRecordPage {
       const records = await StorageUtil.getRecords();
       records.unshift(record);
       await StorageUtil.saveRecords(records);
+      console.log('AddRecordPage: 记录已保存，总数:', records.length);
 
       // 如果是支出，检查预算状态
       if (this.recordType === 'expense') {
@@ -85,10 +102,15 @@ struct AddRecordPage {
         duration: 1500
       });
 
-      // 延迟返回，让用户看到提示
+      // 发送事件通知其他页面数据已更新
+      console.log('AddRecordPage: 发送 RECORDS_CHANGED 事件');
+      EventBus.emit(Events.RECORDS_CHANGED, record);
+
+      // 延迟返回，确保事件已被处理和 UI 已更新
       setTimeout(() => {
+        console.log('AddRecordPage: 返回首页');
         router.back();
-      }, 500);
+      }, 1200);
     } catch (error) {
       console.error('保存记录失败:', error);
       promptAction.showToast({

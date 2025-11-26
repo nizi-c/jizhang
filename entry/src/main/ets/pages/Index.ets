@@ -1,4 +1,5 @@
 import { AccountRecord } from '../models/AccountRecord';
+import { AccountBook } from '../models/AccountBook';
 import { AccountViewModel } from '../viewmodel/AccountViewModel';
 import { StorageUtil } from '../utils/StorageUtil';
 import { DateUtil } from '../utils/DateUtil';
@@ -9,11 +10,17 @@ import { MockData } from '../utils/MockData';
 import { AccountBookUtil } from '../utils/AccountBookUtil';
 import { ResponsiveUtil, DeviceType } from '../utils/ResponsiveUtil';
 import { ResponsiveConstants } from '../constants/ResponsiveConstants';
+import { EventBus, Events } from '../utils/EventBus';
 import router from '@ohos.router';
 import { QueryPage } from './QueryPage';
 import { ChartPage } from './ChartPage';
 import promptAction from '@ohos.promptAction';
 import common from '@ohos.app.ability.common';
+
+interface StatsResult {
+  income: number;
+  expense: number;
+}
 
 @Entry
 @Component
@@ -29,48 +36,122 @@ struct Index {
   @State currentBookName: string = '默认账本';
   @State deviceType: DeviceType = ResponsiveUtil.getDeviceType();
   @State screenWidth: number = ResponsiveUtil.getScreenWidth();
+  @State refreshTrigger: number = 0;  // 强制刷新标记
   menuDialogController: CustomDialogController | undefined = undefined;
 
-  async aboutToAppear() {
+  aboutToAppear() {
     const context = getContext(this);
     StorageUtil.setContext(context);
     
     // 初始化账本管理
-    await AccountBookUtil.init(context as common.UIAbilityContext);
+    AccountBookUtil.init(context as common.UIAbilityContext).then(() => {
+      console.log('Index: 账本管理已初始化');
+      this.loadRecords();
+      this.loadCurrentBook();
+    });
     
     ThemeUtil.initTheme().then(() => {
       this.currentTheme = ThemeUtil.getTheme();
       this.colors = ThemeUtil.getColors();
     });
+
+    // 监听记录更新事件 - 使用箭头函数保持 this 上下文
+    EventBus.on(Events.RECORDS_CHANGED, () => {
+      console.log('Index: 收到 RECORDS_CHANGED 事件，重新加载数据');
+      this.loadRecords();
+    });
+
+    // 监听账本更新事件
+    EventBus.on(Events.BOOK_UPDATED, () => {
+      console.log('Index: 收到 BOOK_UPDATED 事件，重新加载账本信息');
+      this.loadCurrentBook();
+    });
+
+    // 监听账本切换事件
+    EventBus.on(Events.BOOK_SWITCHED, () => {
+      console.log('Index: 收到 BOOK_SWITCHED 事件，重新加载所有数据');
+      this.loadRecords();
+      this.loadCurrentBook();
+    });
+  }
+
+  onPageShow() {
+    // 每次页面显示时都重新加载数据，确保数据最新
+    console.log('Index: onPageShow 触发，重新加载数据');
     this.loadRecords();
+    this.loadCurrentBook();
   }
 
-  async onPageShow() {
-    await this.loadRecords();
-    await this.loadCurrentBook();
+  onPageHide() {
+    // 页面隐藏时的处理
   }
 
-  async loadRecords() {
-    this.records = await StorageUtil.getRecords();
-    this.viewModel.records = this.records;
-    this.updateSummary();
-  }
-
-  async loadCurrentBook() {
-    const book = await AccountBookUtil.getCurrentBook();
-    if (book) {
-      this.currentBookName = book.name;
+  onWindowFocusChanged(hasFocus: boolean) {
+    // 当窗口获得焦点时刷新数据
+    if (hasFocus) {
+      console.log('Index: onWindowFocusChanged 获得焦点，重新加载数据');
+      this.loadRecords();
+      this.loadCurrentBook();
     }
   }
 
+  onBackPress() {
+    // 返回时刷新数据
+    console.log('Index: onBackPress 触发');
+    this.loadRecords();
+    this.loadCurrentBook();
+    return false;
+  }
+
+  loadRecords() {
+    StorageUtil.getRecords().then((newRecords: AccountRecord[]) => {
+      console.log('Index: 从存储读取的记录数:', newRecords.length);
+      
+      // 强制更新数组引用，触发 UI 刷新
+      this.records = [...newRecords];
+      
+      // 确保 ViewModel 的 records 被正确更新
+      this.viewModel.records = [...newRecords];
+      
+      console.log('Index: 更新后 - this.records 长度:', this.records.length, 'viewModel.records 长度:', this.viewModel.records.length);
+      
+      this.updateSummary();
+      console.log('Index: 数据已加载，记录数:', this.records.length, '今日收入:', this.todayIncome, '支出:', this.todayExpense);
+    }).catch((error: Error) => {
+      console.error('Index: 加载记录失败:', error);
+    });
+  }
+
+  loadCurrentBook() {
+    AccountBookUtil.getCurrentBook().then((book: AccountBook | null) => {
+      if (book) {
+        this.currentBookName = book.name;
+        console.log('Index: 当前账本:', book.name);
+      }
+    }).catch((error: Error) => {
+      console.error('Index: 加载账本失败:', error);
+    });
+  }
+
   updateSummary() {
+    console.log('Index: updateSummary 被调用，ViewModel 中的记录数:', this.viewModel.records.length);
+    
     const today = this.viewModel.getTodaySummary();
+    console.log('Index: 今日统计 - 收入:', today.income, '支出:', today.expense);
+    
     this.todayIncome = today.income;
     this.todayExpense = today.expense;
 
     const month = this.viewModel.getMonthSummary();
+    console.log('Index: 本月统计 - 收入:', month.income, '支出:', month.expense);
+    
     this.monthIncome = month.income;
     this.monthExpense = month.expense;
+    
+    // 强制刷新 UI
+    this.refreshTrigger = this.refreshTrigger + 1;
+    
+    console.log('Index: 统计数据已更新 - 今日收入:', this.todayIncome, '支出:', this.todayExpense, '本月收入:', this.monthIncome, '支出:', this.monthExpense, '刷新标记:', this.refreshTrigger);
   }
 
   getColorScheme() {
@@ -193,9 +274,8 @@ struct Index {
 
       Button() {
         Row() {
-          Image($r('app.media.yusuan'))
-            .width(ResponsiveConstants.getFontSize('body'))
-            .height(ResponsiveConstants.getFontSize('body'))
+          Text('💰')
+            .fontSize(ResponsiveConstants.getFontSize('body'))
             .margin({ right: ResponsiveConstants.getSpacing('small') })
           Text('预算管理')
             .fontSize(ResponsiveConstants.getFontSize('body'))
@@ -321,6 +401,7 @@ struct Index {
     .backgroundImage(ThemeUtil.getBackgroundImage(this.currentTheme))
     .backgroundImageSize(ImageSize.Cover)
     .backgroundImagePosition(Alignment.Center)
+    .key(`main_page_${this.records.length}_${this.refreshTrigger}`)
   }
 
 
@@ -341,11 +422,21 @@ struct Index {
   buildPhoneLayout() {
     // 手机布局：单列
     Column() {
-      // 今日统计卡片
-      this.buildStatCard('今日收支', this.todayIncome, this.todayExpense);
+      // 调试按钮 - 手动刷新
+      Button('手动刷新统计数据')
+        .width('90%')
+        .margin({ top: 10, bottom: 10 })
+        .onClick(() => {
+          console.log('手动刷新按钮被点击');
+          this.refreshTrigger = this.refreshTrigger + 1;
+          console.log('refreshTrigger 已更新为:', this.refreshTrigger);
+        })
       
-      // 本月统计卡片
-      this.buildStatCard('本月收支', this.monthIncome, this.monthExpense);
+      // 今日统计卡片 - 直接计算而不使用 @State 变量
+      this.buildStatCardDirect('今日收支', true);
+      
+      // 本月统计卡片 - 直接计算而不使用 @State 变量
+      this.buildStatCardDirect('本月收支', false);
       
       // 最近记录
       this.buildRecentRecords();
@@ -360,13 +451,13 @@ struct Index {
     Column() {
       Row() {
         Column() {
-          this.buildStatCard('今日收支', this.todayIncome, this.todayExpense);
+          this.buildStatCardDirect('今日收支', true);
         }
         .layoutWeight(1)
         .margin({ right: ResponsiveConstants.getSpacing('medium') })
 
         Column() {
-          this.buildStatCard('本月收支', this.monthIncome, this.monthExpense);
+          this.buildStatCardDirect('本月收支', false);
         }
         .layoutWeight(1)
       }
@@ -386,13 +477,13 @@ struct Index {
     Column() {
       Row() {
         Column() {
-          this.buildStatCard('今日收支', this.todayIncome, this.todayExpense);
+          this.buildStatCardDirect('今日收支', true);
         }
         .layoutWeight(1)
         .margin({ right: ResponsiveConstants.getSpacing('large') })
 
         Column() {
-          this.buildStatCard('本月收支', this.monthIncome, this.monthExpense);
+          this.buildStatCardDirect('本月收支', false);
         }
         .layoutWeight(1)
         .margin({ right: ResponsiveConstants.getSpacing('large') })
@@ -406,6 +497,56 @@ struct Index {
     }
     .width('100%')
     .padding({ bottom: ResponsiveConstants.getSpacing('large') })
+  }
+
+  // 计算今日统计
+  calculateTodayStats(): StatsResult {
+    const today = DateUtil.getTodayStr();
+    let income: number = 0;
+    let expense: number = 0;
+    
+    this.records.forEach((record: AccountRecord) => {
+      if (record.dateStr === today) {
+        if (record.type === 'income') {
+          income += record.amount;
+        } else {
+          expense += record.amount;
+        }
+      }
+    });
+    
+    const result: StatsResult = { income: income, expense: expense };
+    return result;
+  }
+
+  // 计算本月统计
+  calculateMonthStats(): StatsResult {
+    const thisMonth = DateUtil.getThisMonthStr();
+    let income: number = 0;
+    let expense: number = 0;
+    
+    this.records.forEach((record: AccountRecord) => {
+      if (record.dateStr.startsWith(thisMonth)) {
+        if (record.type === 'income') {
+          income += record.amount;
+        } else {
+          expense += record.amount;
+        }
+      }
+    });
+    
+    const result: StatsResult = { income: income, expense: expense };
+    return result;
+  }
+
+  // 直接计算统计数据的方法
+  @Builder
+  buildStatCardDirect(title: string, isToday: boolean) {
+    if (isToday) {
+      this.buildStatCard(title, this.calculateTodayStats().income, this.calculateTodayStats().expense);
+    } else {
+      this.buildStatCard(title, this.calculateMonthStats().income, this.calculateMonthStats().expense);
+    }
   }
 
   @Builder
@@ -426,6 +567,7 @@ struct Index {
             .fontSize(ResponsiveConstants.getFontSize('body'))
             .fontWeight(FontWeight.Bold)
             .fontColor(this.getColorScheme().STAT_CARD.incomeColor)
+            .key(`income_${this.refreshTrigger}`)
         }
         .layoutWeight(1)
 
@@ -438,6 +580,7 @@ struct Index {
             .fontSize(ResponsiveConstants.getFontSize('body'))
             .fontWeight(FontWeight.Bold)
             .fontColor(this.getColorScheme().STAT_CARD.expenseColor)
+            .key(`expense_${this.refreshTrigger}`)
         }
         .layoutWeight(1)
 
@@ -452,6 +595,7 @@ struct Index {
             .fontColor(income >= expense ? 
               this.getColorScheme().STAT_CARD.incomeColor : 
               this.getColorScheme().STAT_CARD.expenseColor)
+            .key(`balance_${this.refreshTrigger}`)
         }
         .layoutWeight(1)
       }
