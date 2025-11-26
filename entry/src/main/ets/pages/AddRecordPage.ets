@@ -106,10 +106,13 @@ struct AddRecordPage {
       console.log('AddRecordPage: 发送 RECORDS_CHANGED 事件');
       EventBus.emit(Events.RECORDS_CHANGED, record);
 
-      // 延迟返回，确保事件已被处理和 UI 已更新
+      // 使用 replaceUrl 强制重建页面，解决 ArkTS 状态管理 bug
       setTimeout(() => {
-        console.log('AddRecordPage: 返回首页');
-        router.back();
+        console.log('AddRecordPage: 强制重建首页');
+        router.replaceUrl({
+          url: 'pages/Index',
+          params: { refresh: Date.now() }
+        });
       }, 1200);
     } catch (error) {
       console.error('保存记录失败:', error);

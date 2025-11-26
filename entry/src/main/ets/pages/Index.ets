@@ -25,18 +25,21 @@ interface StatsResult {
 @Entry
 @Component
 struct Index {
+  // records 必须是 @State，否则 ForEach 不会更新
+  @State records: AccountRecord[] = [];
+  viewModel: AccountViewModel = new AccountViewModel();
+  
+  // 统计结果也使用 @State
   @State todayIncome: number = 0;
   @State todayExpense: number = 0;
   @State monthIncome: number = 0;
   @State monthExpense: number = 0;
-  @State records: AccountRecord[] = [];
-  @State viewModel: AccountViewModel = new AccountViewModel();
+  
   @State currentTheme: ThemeType = 'light';
   @State colors: ThemeColors = ThemeUtil.LIGHT_THEME;
   @State currentBookName: string = '默认账本';
   @State deviceType: DeviceType = ResponsiveUtil.getDeviceType();
   @State screenWidth: number = ResponsiveUtil.getScreenWidth();
-  @State refreshTrigger: number = 0;  // 强制刷新标记
   menuDialogController: CustomDialogController | undefined = undefined;
 
   aboutToAppear() {
@@ -103,23 +106,12 @@ struct Index {
     return false;
   }
 
-  loadRecords() {
-    StorageUtil.getRecords().then((newRecords: AccountRecord[]) => {
-      console.log('Index: 从存储读取的记录数:', newRecords.length);
-      
-      // 强制更新数组引用，触发 UI 刷新
-      this.records = [...newRecords];
-      
-      // 确保 ViewModel 的 records 被正确更新
-      this.viewModel.records = [...newRecords];
-      
-      console.log('Index: 更新后 - this.records 长度:', this.records.length, 'viewModel.records 长度:', this.viewModel.records.length);
-      
-      this.updateSummary();
-      console.log('Index: 数据已加载，记录数:', this.records.length, '今日收入:', this.todayIncome, '支出:', this.todayExpense);
-    }).catch((error: Error) => {
-      console.error('Index: 加载记录失败:', error);
-    });
+  async loadRecords() {
+    // 模仿 ChartPage 的 loadData 方式
+    this.records = await StorageUtil.getRecords();
+    this.viewModel.records = this.records;
+    console.log('Index: 数据已加载，记录数:', this.records.length);
+    this.updateSummary();
   }
 
   loadCurrentBook() {
@@ -134,24 +126,16 @@ struct Index {
   }
 
   updateSummary() {
-    console.log('Index: updateSummary 被调用，ViewModel 中的记录数:', this.viewModel.records.length);
-    
+    // 模仿 ChartPage 的方式：直接计算并赋值给 @State 变量
     const today = this.viewModel.getTodaySummary();
-    console.log('Index: 今日统计 - 收入:', today.income, '支出:', today.expense);
+    const month = this.viewModel.getMonthSummary();
     
     this.todayIncome = today.income;
     this.todayExpense = today.expense;
-
-    const month = this.viewModel.getMonthSummary();
-    console.log('Index: 本月统计 - 收入:', month.income, '支出:', month.expense);
-    
     this.monthIncome = month.income;
     this.monthExpense = month.expense;
     
-    // 强制刷新 UI
-    this.refreshTrigger = this.refreshTrigger + 1;
-    
-    console.log('Index: 统计数据已更新 - 今日收入:', this.todayIncome, '支出:', this.todayExpense, '本月收入:', this.monthIncome, '支出:', this.monthExpense, '刷新标记:', this.refreshTrigger);
+    console.log('Index: 统计已更新 - 今日:', this.todayIncome, this.todayExpense, '本月:', this.monthIncome, this.monthExpense);
   }
 
   getColorScheme() {
@@ -401,7 +385,6 @@ struct Index {
     .backgroundImage(ThemeUtil.getBackgroundImage(this.currentTheme))
     .backgroundImageSize(ImageSize.Cover)
     .backgroundImagePosition(Alignment.Center)
-    .key(`main_page_${this.records.length}_${this.refreshTrigger}`)
   }
 
 
@@ -422,21 +405,11 @@ struct Index {
   buildPhoneLayout() {
     // 手机布局：单列
     Column() {
-      // 调试按钮 - 手动刷新
-      Button('手动刷新统计数据')
-        .width('90%')
-        .margin({ top: 10, bottom: 10 })
-        .onClick(() => {
-          console.log('手动刷新按钮被点击');
-          this.refreshTrigger = this.refreshTrigger + 1;
-          console.log('refreshTrigger 已更新为:', this.refreshTrigger);
-        })
+      // 今日统计卡片 - 使用 @State 变量
+      this.buildStatCard('今日收支', this.todayIncome, this.todayExpense);
       
-      // 今日统计卡片 - 直接计算而不使用 @State 变量
-      this.buildStatCardDirect('今日收支', true);
-      
-      // 本月统计卡片 - 直接计算而不使用 @State 变量
-      this.buildStatCardDirect('本月收支', false);
+      // 本月统计卡片 - 使用 @State 变量
+      this.buildStatCard('本月收支', this.monthIncome, this.monthExpense);
       
       // 最近记录
       this.buildRecentRecords();
@@ -451,13 +424,13 @@ struct Index {
     Column() {
       Row() {
         Column() {
-          this.buildStatCardDirect('今日收支', true);
+          this.buildStatCard('今日收支', this.todayIncome, this.todayExpense);
         }
         .layoutWeight(1)
         .margin({ right: ResponsiveConstants.getSpacing('medium') })
 
         Column() {
-          this.buildStatCardDirect('本月收支', false);
+          this.buildStatCard('本月收支', this.monthIncome, this.monthExpense);
         }
         .layoutWeight(1)
       }
@@ -477,13 +450,13 @@ struct Index {
     Column() {
       Row() {
         Column() {
-          this.buildStatCardDirect('今日收支', true);
+          this.buildStatCard('今日收支', this.todayIncome, this.todayExpense);
         }
         .layoutWeight(1)
         .margin({ right: ResponsiveConstants.getSpacing('large') })
 
         Column() {
-          this.buildStatCardDirect('本月收支', false);
+          this.buildStatCard('本月收支', this.monthIncome, this.monthExpense);
         }
         .layoutWeight(1)
         .margin({ right: ResponsiveConstants.getSpacing('large') })
@@ -567,7 +540,6 @@ struct Index {
             .fontSize(ResponsiveConstants.getFontSize('body'))
             .fontWeight(FontWeight.Bold)
             .fontColor(this.getColorScheme().STAT_CARD.incomeColor)
-            .key(`income_${this.refreshTrigger}`)
         }
         .layoutWeight(1)
 
@@ -580,7 +552,6 @@ struct Index {
             .fontSize(ResponsiveConstants.getFontSize('body'))
             .fontWeight(FontWeight.Bold)
             .fontColor(this.getColorScheme().STAT_CARD.expenseColor)
-            .key(`expense_${this.refreshTrigger}`)
         }
         .layoutWeight(1)
 
@@ -595,7 +566,6 @@ struct Index {
             .fontColor(income >= expense ? 
               this.getColorScheme().STAT_CARD.incomeColor : 
               this.getColorScheme().STAT_CARD.expenseColor)
-            .key(`balance_${this.refreshTrigger}`)
         }
         .layoutWeight(1)
       }
